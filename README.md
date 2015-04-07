@@ -32,7 +32,7 @@ For newer features you may want to install newer version of this addon on your o
 Follow this steps:
 
 1. Get the newest version of file `Night_Mode.py` from GitHub
-2. Run Anki, from menu select `Tools >> Add-ons >> Open Add-ons Folder...` top open add-ons folder
+2. Run Anki, from menu select `Tools >> Add-ons >> Open Add-ons Folder...` to open add-ons folder
 4. Copy downloaded file into folder opened in previous step
 5. Restart Anki
 6. Enjoy
