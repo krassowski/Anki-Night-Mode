@@ -2,7 +2,7 @@
 
 This plugin adds the function of night mode, similar that one implemented in AnkiDroid.
 
-## How it works?
+### How it works?
 
 It adds a "view" menu entity (if it doesn't exist) with options like:
 - switching night mode
@@ -13,8 +13,32 @@ It provides shortcut `ctrl+n` to quickly switch mode and color picker to adjust 
 
 After enabling night mode, addon changes colors of menubar, toolbar, bottombars and content windows.
 
-Feel free to send bug reports or feature requests!
+### How can I get it?
 
-## Preview
+#### Automatic install
+
+You can download this addon by Anki.
+From menu select: `Tools >> Add-ons >> Browse && Install...` and into prompt put following code:
+
+`1496166067`
+
+after clicking `ok` addon will be downloaded. Then you shall restart your Anki.
+
+To switch into night mode you can use `ctrl+n` shortcut or take a look on new options in your menu: `View >> Night Mode >> ...`.
+
+#### Manual installation
+
+For newer features you may want to install newer version of this addon on your own. Follow this steps:
+1. Get newest version of file `Night_Mode.py` from GitHub
+2. Run Anki, from menu select `Tools >> Add-ons >> Open Add-ons Folder...` top open add-ons folder
+4. Copy downloaded file into folder opened in previous step
+5. Restart Anki
+6. Enjoy
+
+### Preview
 
 ![Preview](https://raw.githubusercontent.com/krassowski/Anki-Night-Mode/master/preview.png)
+
+### For developers
+
+Feel free to contribute, send bug reports or feature requests :)
