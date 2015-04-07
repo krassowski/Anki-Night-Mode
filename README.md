@@ -1,7 +1,8 @@
 # Anki-Night-Mode
 
-This plugin adds the function of night mode, similar that one implemented in AnkiDroid.
 __[Wpis po polsku](http://michal.krassowski.info/komentarz,13)__
+
+This plugin adds the function of night mode, similar that one implemented in AnkiDroid.
 
 ### How it works?
 
