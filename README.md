@@ -24,7 +24,7 @@ From menu select: `Tools >> Add-ons >> Browse && Install...` and into prompt put
 
 after clicking `ok` addon will be downloaded. Then you shall restart your Anki.
 
-To switch into night mode you can use `ctrl+n` shortcut or take a look on new options in your menu: `View >> Night Mode >> ...`.
+To switch into night mode you can use `ctrl+n` shortcut or make use of some new options in your menu: `View >> Night Mode >> ...`.
 
 #### Manual installation
 
