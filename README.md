@@ -29,6 +29,7 @@ To switch into night mode you can use `ctrl+n` shortcut or make use of some new 
 #### Manual installation
 
 For newer features you may want to install newer version of this addon on your own. Follow this steps:
+
 1. Get newest version of file `Night_Mode.py` from GitHub
 2. Run Anki, from menu select `Tools >> Add-ons >> Open Add-ons Folder...` top open add-ons folder
 4. Copy downloaded file into folder opened in previous step
