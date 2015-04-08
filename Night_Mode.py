@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0"
+__version__ = "1.0.1"
 
 from aqt import mw
 
@@ -510,6 +510,10 @@ nm_css_body = """
 img#star
 {
 	-webkit-filter: invert(0%)!important;
+}
+.cloze
+{
+	color: #5566ee!important;
 }
 """
 
