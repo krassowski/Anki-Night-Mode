@@ -12,7 +12,7 @@ It adds a "view" menu entity (if it doesn't exist) with options like:
 
 It provides shortcut ctrl+n to quickly switch mode and color picker to adjust some of color parameters.
 
-After enabling night mode, addon changes colors of menubar, toolbar, bottombars and content windows.
+After enabling night mode, add-on changes colors of menubar, toolbar, bottombars and content windows.
 
 If you want to contribute visit GitHub page: https://github.com/krassowski/Anki-Night-Mode
 Also, feel free to send me bug reports or feature requests.
@@ -84,7 +84,7 @@ def nm_ilatex():
 
 def nm_color_t():
 	"""
-	Open color picker and set choosen color to text (in content)
+	Open color picker and set chosen color to text (in content)
 	"""
 	global nm_color_t
 	nm_qcolor_old = QColor(nm_color_t)
@@ -96,7 +96,7 @@ def nm_color_t():
 
 def nm_color_b():
 	"""
-	Open color picker and set choosen color to background (of content)
+	Open color picker and set chosen color to background (of content)
 	"""
 	global nm_color_b
 	nm_qcolor_old = QColor(nm_color_b)
@@ -172,7 +172,7 @@ def nm_load():
 
 def nm_onload():
 	"""
-	Add hooks and intialize menu.
+	Add hooks and initialize menu.
 	Call to this function is placed on the end of this file.
 	"""
 	addHook("unloadProfile", nm_save)
@@ -186,7 +186,7 @@ def nm_append_to_styles(bottom='', body='', top='', decks='',
 						waiting_screen=''):
 	"""
 	This function changes CSS style of most objects. In basic use,
-	it only reloads orginal styles and refreshes interface.
+	it only reloads original styles and refreshes interface.
 
 	All arguments are expected to be strings with CSS styles.
 	"""
@@ -320,7 +320,7 @@ def nm_setup_menu():
 
 def nm_card_color_css():
 	"""
-	Genarate and return CSS style of class "card",
+	Generate and return CSS style of class "card",
 	using global color declarations
 	"""
 	return (".card {	color:" + nm_color_t + "!important;" +
@@ -329,7 +329,7 @@ def nm_card_color_css():
 
 def nm_body_color_css():
 	"""
-	Genarate and return CSS style of class "card",
+	Generate and return CSS style of class "card",
 	using global color declarations
 	"""
 	return (" body {	color:" + nm_color_t + "!important;" +
