@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 from aqt import mw
 
@@ -46,7 +46,7 @@ nm_color_t = "#ffffff"
 
 
 # Save orginal values for further use.
-nm_default_css_menu = mw.form.menubar.styleSheet()
+nm_default_css_menu = mw.styleSheet()
 
 nm_default_css_top = mw.toolbar._css
 nm_default_css_body = mw.reviewer._css
@@ -129,7 +129,7 @@ def nm_about():
 
 def nm_save():
 	"""
-	Saves configurable varibles into profile, so they can
+	Saves configurable variables into profile, so they can
 	be used to restore previous state after Anki restart.
 	"""
 	mw.pm.profile['nm_state_on'] = nm_state_on
@@ -141,7 +141,7 @@ def nm_save():
 
 def nm_load():
 	"""
-	Load configuration from profile, set states of chekable menu objects
+	Load configuration from profile, set states of checkable menu objects
 	and turn on night mode if it were enabled on previous session.
 	"""
 	global nm_menu_iimage, nm_menu_ilatex, nm_state_on, \
@@ -197,7 +197,8 @@ def nm_append_to_styles(bottom='', body='', top='', decks='',
 		body += nm_css_ilatex
 
 	# Apply styles to Python objects or by Qt functions.
-	mw.form.menubar.setStyleSheet(nm_default_css_menu + menu)
+
+	mw.setStyleSheet(nm_default_css_menu + menu)
 	mw.toolbar._css = nm_default_css_top + top
 	mw.reviewer._bottomCSS = nm_default_css_bottom + bottom
 	mw.reviewer._css = nm_default_css_body + body
@@ -558,10 +559,10 @@ nm_css_other_bottoms = nm_css_buttons + """
 nm_css_overview = nm_css_buttons + nm_css_color_replacer
 
 nm_css_menu = """
-QMenuBar
+QMenuBar,QMenu
 {
     background-color: #444;
-    color: #ddd;
+    color: #eee;
 }
 QMenuBar::item
 {
@@ -569,12 +570,25 @@ QMenuBar::item
 }
 QMenuBar::item:selected
 {
-    background-color: #495B6C!important;
-    color: #eee;
+    background-color: rgb(30,30,30)!important;
 	border-top-left-radius: 6px;
 	border-top-right-radius: 6px;
 }
+QMenu
+{
+    border: 1px solid #111;
+}
+QMenu::item::selected
+{
+    background-color: rgb(30,30,30);
+}
+QMenu::item
+{
+     padding: 3px 25px 3px 25px;
+     border: 1px solid transparent;
+}
 """
+
 
 #
 # ONLOAD SECTION
