@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 from aqt import mw
 
@@ -121,9 +121,12 @@ def nm_about():
 	Show "about" window.
 	"""
 	nm_about_box = QMessageBox()
+	if nm_state_on:
+		nm_about_box.setStyleSheet(nm_message_box_css())
 	nm_about_box.setText(__addon_name__ + " " + __version__ + __doc__)
 	nm_about_box.setGeometry(300, 300, 250, 150)
 	nm_about_box.setWindowTitle("About " + __addon_name__ + " " + __version__)
+
 	nm_about_box.exec_()
 
 
@@ -335,14 +338,22 @@ def nm_body_color_css():
 	return (" body {	color:" + nm_color_t + "!important;" +
 			"background-color:" + nm_color_b + "!important}")
 
+
+def nm_message_box_css():
+	"""
+	Generate and return CSS style of class QMessageBox,
+	using global color declarations
+	"""
+	return ("QMessageBox,QLabel {	color:" + nm_color_t + ";" +
+			"background-color:" + nm_color_b + "}" + nm_css_qt_buttons)
+
+
 #
 # GLOBAL CSS STYLES SECTION
 #
 
 # Thanks to http://devgrow.com/dark-button-navigation-using-css3/
-nm_css_buttons = """
-button
-{
+nm_css_button_idle = """
     color: #AFB9C1;
     text-shadow: 1px 1px #1f272b;
 	margin-top: 0;
@@ -354,20 +365,55 @@ button
     border: 1px solid #3E474D;
     border-top-color: #1c252b;
     border-left-color: #2d363c;
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#3D4850), color-stop(4%,#313d45), color-stop(100%,#232B30));
+"""
+
+nm_css_button_hover = """
+    color: #fff;
+"""
+
+nm_css_button_active = """
+    color: #fff;
+"""
+
+nm_css_buttons = """
+button
+{
+	""" + nm_css_button_idle + """
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#3D4850), color-stop(4%,#313d45), color-stop(100%,#232B30));
     -webkit-box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
     -webkit-border-radius: 3px;
 }
 button:hover
 {
-    color: #fff;
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#4C5A64), color-stop(4%,#404F5A), color-stop(100%,#2E3940));
+	""" + nm_css_button_hover + """
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#4C5A64), color-stop(4%,#404F5A), color-stop(100%,#2E3940));
 }
 button:active
 {
-    color: #fff;
+	""" + nm_css_button_active + """
     background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#20282D), color-stop(51%,#252E34), color-stop(100%,#222A30));
     -webkit-box-shadow: 1px 1px 1px rgba(255,255,255,0.1);
+}
+"""
+
+nm_css_qt_buttons = """
+QPushButton
+{
+	min-width:70px;
+	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
+    box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+    border-radius: 3px;
+    """ + nm_css_button_idle + """
+}
+QPushButton:hover
+{
+	""" + nm_css_button_hover + """
+	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #4C5A64, stop: 0.04 #404F5A, stop: 1 #2E3940);
+}
+QPushButton:pressed
+{
+	""" + nm_css_button_active + """
+	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #20282D, stop: 0.51 #252E34, stop: 1 #222A30);
 }
 """
 
