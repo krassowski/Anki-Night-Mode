@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 # Copyright: Michal Krassowski <krassowski.michal@gmail.com>
 # License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
@@ -22,12 +23,14 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 from aqt import mw
+from aqt.editcurrent import EditCurrent
 
 from anki.lang import _
 from anki.hooks import addHook
+from anki.hooks import wrap
 
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QAction, QKeySequence, QMenu, \
@@ -59,7 +62,7 @@ nm_default_css_overview = mw.overview._css
 nm_default_css_overview_bottom = mw.overview.bottom._css
 # sharedCSS is only used for "Waiting for editing to finish." screen.
 nm_default_css_waiting_screen = mw.sharedCSS
-
+nm_default_editor = None
 
 def nm_iimage():
 	"""
@@ -173,6 +176,59 @@ def nm_load():
 		nm_menu_ilatex.setChecked(True)
 
 
+def nm_style_fields(editor):
+
+	if nm_state_on:
+
+		l = str(len(editor.note.fields))
+
+		javascript = """
+		for (var i=0; i < """ + l + """; i++) {
+			// change colors only if the card is not marked or the bg color is changed in card styles
+			bg_color = $("#f"+i).css("background-color")
+			if (bg_color == "rgb(255, 255, 255)")
+			{
+				$("#f"+i).css("color", '""" + nm_color_t + """');
+				$("#f"+i).css("background-color", '""" + nm_color_b + """');
+			}
+			else if (bg_color == "rgb(255, 204, 204)")
+			{
+				$("#f"+i).css("color", "black");
+				$("#f"+i).css("background-color", "DarkOrange");
+			}
+		}
+		"""
+
+		editor.web.eval('$(".fname").css("color", "' + nm_color_t + '")')
+		editor.web.eval('$("a").css("color", "#00BBFF!important")')
+
+		editor.web.eval(javascript)
+
+
+def nm_check_valid():
+	nm_style_fields(nm_default_editor)
+
+
+def nm_styled_edit_current__init__(self, mw):
+
+	if nm_state_on:
+		self.setStyleSheet(nm_dialog_css())
+
+		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons)
+		self.form.fieldsArea.setStyleSheet(nm_dialog_css() + nm_css_qt_mid_buttons)
+
+		self.editor.tags.completer.popup().setStyleSheet(nm_css_completer)
+
+		nm_style_fields(self.editor)
+
+		global nm_default_editor
+
+		if not nm_default_editor:
+			nm_default_editor = self.editor
+
+		self.editor.checkValid = wrap(self.editor.checkValid, nm_check_valid)
+
+
 def nm_onload():
 	"""
 	Add hooks and initialize menu.
@@ -182,6 +238,10 @@ def nm_onload():
 	addHook("profileLoaded", nm_load)
 
 	nm_setup_menu()
+
+	#TODO doc
+
+	EditCurrent.__init__ = wrap(EditCurrent.__init__, nm_styled_edit_current__init__)
 
 
 def nm_append_to_styles(bottom='', body='', top='', decks='',
@@ -210,6 +270,7 @@ def nm_append_to_styles(bottom='', body='', top='', decks='',
 	mw.overview._css = nm_default_css_overview + overview
 	mw.overview.bottom._css = nm_default_css_overview_bottom + other_bottoms
 	mw.sharedCSS = nm_default_css_waiting_screen + waiting_screen
+
 
 	# Reload current screen.
 	if mw.state == "review":
@@ -345,8 +406,17 @@ def nm_message_box_css():
 	using global color declarations
 	"""
 	return ("QMessageBox,QLabel {	color:" + nm_color_t + ";" +
-			"background-color:" + nm_color_b + "}" + nm_css_qt_buttons)
+			"background-color:" + nm_color_b + "}" + nm_css_qt_buttons +
+			"QPushButton {  min-width: 70px }" )
 
+
+def nm_dialog_css():
+	"""
+	Generate and return CSS style of AnkiQt Dialogs,
+	using global color declarations
+	"""
+	return ("QDialog,QLabel {	color:" + nm_color_t + ";" +
+			"background-color:" + nm_color_b + "}")
 
 #
 # GLOBAL CSS STYLES SECTION
@@ -354,25 +424,25 @@ def nm_message_box_css():
 
 # Thanks to http://devgrow.com/dark-button-navigation-using-css3/
 nm_css_button_idle = """
-    color: #AFB9C1;
-    text-shadow: 1px 1px #1f272b;
+	color: #AFB9C1;
+	text-shadow: 1px 1px #1f272b;
 	margin-top: 0;
 	position:relative;
 	top: 0;
 	outline: 0;
-    padding: 3px 8px;
-    display: inline-block;
-    border: 1px solid #3E474D;
-    border-top-color: #1c252b;
-    border-left-color: #2d363c;
+	padding: 3px 8px;
+	display: inline-block;
+	border: 1px solid #3E474D;
+	border-top-color: #1c252b;
+	border-left-color: #2d363c;
 """
 
 nm_css_button_hover = """
-    color: #fff;
+	color: #fff;
 """
 
 nm_css_button_active = """
-    color: #fff;
+	color: #fff;
 """
 
 nm_css_buttons = """
@@ -380,8 +450,8 @@ button
 {
 	""" + nm_css_button_idle + """
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#3D4850), color-stop(4%,#313d45), color-stop(100%,#232B30));
-    -webkit-box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
-    -webkit-border-radius: 3px;
+	-webkit-box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+	-webkit-border-radius: 3px;
 }
 button:hover
 {
@@ -391,19 +461,52 @@ button:hover
 button:active
 {
 	""" + nm_css_button_active + """
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#20282D), color-stop(51%,#252E34), color-stop(100%,#222A30));
-    -webkit-box-shadow: 1px 1px 1px rgba(255,255,255,0.1);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#20282D), color-stop(51%,#252E34), color-stop(100%,#222A30));
+	-webkit-box-shadow: 1px 1px 1px rgba(255,255,255,0.1);
 }
+"""
+
+nm_css_completer = """
+	background-color:black;
+	border-color:#444;
+	color:#eee;
+"""
+
+
+nm_css_qt_mid_buttons = """
+QLineEdit
+{
+""" + nm_css_completer + """
+}
+/*
+QPushButton
+{
+	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #8E99AA, stop: 0.04 #828E96, stop: 1 #747C8A);
+	box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+	border-radius: 3px;
+	""" + nm_css_button_idle + """
+	color: #000;
+}
+QPushButton:hover
+{
+	""" + nm_css_button_hover + """
+	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #9CAAB4, stop: 0.04 #909FAA, stop: 1 #7E8990);
+}
+QPushButton:pressed
+{
+	""" + nm_css_button_active + """
+	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #70787D, stop: 0.51 #757E84, stop: 1 #727A80);
+}
+*/
 """
 
 nm_css_qt_buttons = """
 QPushButton
 {
-	min-width:70px;
 	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
-    box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
-    border-radius: 3px;
-    """ + nm_css_button_idle + """
+	box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+	border-radius: 3px;
+	""" + nm_css_button_idle + """
 }
 QPushButton:hover
 {
@@ -607,31 +710,31 @@ nm_css_overview = nm_css_buttons + nm_css_color_replacer
 nm_css_menu = """
 QMenuBar,QMenu
 {
-    background-color: #444;
-    color: #eee;
+	background-color: #444;
+	color: #eee;
 }
 QMenuBar::item
 {
-    background-color: transparent;
+	background-color: transparent;
 }
 QMenuBar::item:selected
 {
-    background-color: rgb(30,30,30)!important;
+	background-color: rgb(30,30,30)!important;
 	border-top-left-radius: 6px;
 	border-top-right-radius: 6px;
 }
 QMenu
 {
-    border: 1px solid #111;
+	border: 1px solid #111;
 }
 QMenu::item::selected
 {
-    background-color: rgb(30,30,30);
+	background-color: rgb(30,30,30);
 }
 QMenu::item
 {
-     padding: 3px 25px 3px 25px;
-     border: 1px solid transparent;
+	padding: 3px 25px 3px 25px;
+	border: 1px solid transparent;
 }
 """
 
