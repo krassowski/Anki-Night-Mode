@@ -23,7 +23,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 
 from aqt import mw
 from aqt.editcurrent import EditCurrent
@@ -214,8 +214,8 @@ def nm_styled_edit_current__init__(self, mw):
 	if nm_state_on:
 		self.setStyleSheet(nm_dialog_css())
 
-		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons)
-		self.form.fieldsArea.setStyleSheet(nm_dialog_css() + nm_css_qt_mid_buttons)
+		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons())
+		self.form.fieldsArea.setStyleSheet(nm_css_qt_mid_buttons)
 
 		self.editor.tags.completer.popup().setStyleSheet(nm_css_completer)
 
@@ -406,8 +406,30 @@ def nm_message_box_css():
 	using global color declarations
 	"""
 	return ("QMessageBox,QLabel {	color:" + nm_color_t + ";" +
-			"background-color:" + nm_color_b + "}" + nm_css_qt_buttons +
+			"background-color:" + nm_color_b + "}" + nm_css_qt_buttons() +
 			"QPushButton {  min-width: 70px }" )
+
+
+def nm_css_qt_buttons(restric_to=""):
+	return """
+	""" + restric_to + """ QPushButton
+	{
+		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
+		box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+		border-radius: 3px;
+		""" + nm_css_button_idle + """
+	}
+	""" + restric_to + """ QPushButton:hover
+	{
+		""" + nm_css_button_hover + """
+		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #4C5A64, stop: 0.04 #404F5A, stop: 1 #2E3940);
+	}
+	""" + restric_to + """ QPushButton:pressed
+	{
+		""" + nm_css_button_active + """
+		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #20282D, stop: 0.51 #252E34, stop: 1 #222A30);
+	}
+	"""
 
 
 def nm_dialog_css():
@@ -416,7 +438,38 @@ def nm_dialog_css():
 	using global color declarations
 	"""
 	return ("QDialog,QLabel {	color:" + nm_color_t + ";" +
-			"background-color:" + nm_color_b + "}")
+			"background-color:" + nm_color_b + "}" +
+			"QFontComboBox, QCheckBox, QSpinBox, QRadioButton{background-color:" + nm_color_b + ";color:" + nm_color_t + "}" + """
+			QFontComboBox::drop-down{border: 0px; border-left: 1px solid #555; width: 30px;}
+
+			QFontComboBox::down-arrow{width:12px; height:8px; image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wUNEzoHsJsFBAAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAADbSURBVBjTXY0xSgNRFEXP/TMTJugebFKKmCKN29KFSAxWgusIKFjZamEliEoWoE0g8//MuzZRYk57z+HqOXthmCYRBgs89EgVAYTAgAMssUxfDRfAa5iCKTaFik6mk8mYHCYnePuuWcg2TxuOVDNXMIrtixLePmCzyT3nszGrBDBt+Uw9cyWKEoVEISgSxSJ74Ho2ZgWQ2HLSch9mmUSWyQMUB5ng7rTl4df7CwAOG24YeE+QK9EhPg4abnedf8EEumHEZSTWAeuouZpAt+vINvu89JwBHNc87m8//tFrm27x7RcAAAAASUVORK5CYII=);}
+			QFontComboBox, QSpinBox{border: 1px solid #555;}
+
+			QTabWidget QWidget
+			{
+				color: """ + nm_color_t + """;
+				background-color: #222;
+				border-color: #555;
+			}
+			QTabWidget QLabel {
+				position:relative;
+			}
+			QTabWidget QTabBar
+			{
+				color: #000
+			}
+			QTabWidget QTextEdit
+			{
+				border-color: #555;
+			}
+			QTabWidget QGroupBox::title
+			{
+				subcontrol-origin: margin;
+				subcontrol-position:top left;
+				margin-top:-7px;
+			}
+			""" + nm_css_qt_buttons("QTabWidget")
+			)
 
 #
 # GLOBAL CSS STYLES SECTION
@@ -472,12 +525,12 @@ nm_css_completer = """
 	color:#eee;
 """
 
-
 nm_css_qt_mid_buttons = """
 QLineEdit
 {
 """ + nm_css_completer + """
 }
+
 /*
 QPushButton
 {
@@ -498,26 +551,6 @@ QPushButton:pressed
 	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #70787D, stop: 0.51 #757E84, stop: 1 #727A80);
 }
 */
-"""
-
-nm_css_qt_buttons = """
-QPushButton
-{
-	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
-	box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
-	border-radius: 3px;
-	""" + nm_css_button_idle + """
-}
-QPushButton:hover
-{
-	""" + nm_css_button_hover + """
-	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #4C5A64, stop: 0.04 #404F5A, stop: 1 #2E3940);
-}
-QPushButton:pressed
-{
-	""" + nm_css_button_active + """
-	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #20282D, stop: 0.51 #252E34, stop: 1 #222A30);
-}
 """
 
 nm_css_color_replacer = """
@@ -710,8 +743,8 @@ nm_css_overview = nm_css_buttons + nm_css_color_replacer
 nm_css_menu = """
 QMenuBar,QMenu
 {
-	background-color: #444;
-	color: #eee;
+	background-color: #444!important;
+	color: #eee!important;
 }
 QMenuBar::item
 {
