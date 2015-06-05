@@ -23,10 +23,13 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 
-from aqt import mw
+from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
+from aqt.addcards import AddCards
+from aqt.editor import Editor
+from aqt.utils import showWarning
 
 from anki.lang import _
 from anki.hooks import addHook
@@ -41,6 +44,7 @@ from PyQt4.QtGui import QAction, QKeySequence, QMenu, \
 # with "profileLoaded" hook everything will work.
 
 nm_state_on = False
+nm_enable_in_dialogs = False
 nm_invert_image = False
 nm_invert_latex = False
 
@@ -48,7 +52,7 @@ nm_color_b = "#272828"
 nm_color_t = "#ffffff"
 
 
-# Save orginal values for further use.
+# Save original values for further use.
 nm_default_css_menu = mw.styleSheet()
 
 nm_default_css_top = mw.toolbar._css
@@ -62,7 +66,7 @@ nm_default_css_overview = mw.overview._css
 nm_default_css_overview_bottom = mw.overview.bottom._css
 # sharedCSS is only used for "Waiting for editing to finish." screen.
 nm_default_css_waiting_screen = mw.sharedCSS
-nm_default_editor = None
+
 
 def nm_iimage():
 	"""
@@ -139,6 +143,7 @@ def nm_save():
 	be used to restore previous state after Anki restart.
 	"""
 	mw.pm.profile['nm_state_on'] = nm_state_on
+	mw.pm.profile['nm_enable_in_dialogs'] = nm_enable_in_dialogs
 	mw.pm.profile['nm_invert_image'] = nm_invert_image
 	mw.pm.profile['nm_invert_latex'] = nm_invert_latex
 	mw.pm.profile['nm_color_b'] = nm_color_b
@@ -151,7 +156,8 @@ def nm_load():
 	and turn on night mode if it were enabled on previous session.
 	"""
 	global nm_menu_iimage, nm_menu_ilatex, nm_state_on, \
-		nm_invert_image, nm_invert_latex, nm_color_b, nm_color_t
+		nm_invert_image, nm_invert_latex, nm_color_b, nm_color_t, \
+		nm_enable_in_dialogs
 
 	try:
 		nm_state_on = mw.pm.profile['nm_state_on']
@@ -166,6 +172,12 @@ def nm_load():
 		nm_color_b = "#272828"
 		nm_color_t = "#ffffff"
 
+	# placed in other handler to keep compatibility with current users profiles
+	try:
+		nm_enable_in_dialogs = mw.pm.profile['nm_enable_in_dialogs']
+	except KeyError:
+		nm_enable_in_dialogs = False
+
 	if nm_state_on:
 		nm_on()
 
@@ -175,16 +187,19 @@ def nm_load():
 	if nm_invert_latex:
 		nm_menu_ilatex.setChecked(True)
 
+	if nm_enable_in_dialogs:
+		nm_menu_endial.setChecked(True)
+
 
 def nm_style_fields(editor):
 
-	if nm_state_on:
+	if nm_state_on and nm_enable_in_dialogs:
 
 		l = str(len(editor.note.fields))
 
+		# change colors only if the card is not marked or the bg color is changed in card styles
 		javascript = """
 		for (var i=0; i < """ + l + """; i++) {
-			// change colors only if the card is not marked or the bg color is changed in card styles
 			bg_color = $("#f"+i).css("background-color")
 			if (bg_color == "rgb(255, 255, 255)")
 			{
@@ -200,33 +215,44 @@ def nm_style_fields(editor):
 		"""
 
 		editor.web.eval('$(".fname").css("color", "' + nm_color_t + '")')
-		editor.web.eval('$("a").css("color", "#00BBFF!important")')
+		editor.web.eval('$("a").css("color", "#00BBFF")')
 
 		editor.web.eval(javascript)
 
 
-def nm_check_valid():
-	nm_style_fields(nm_default_editor)
+def nm_edit_current_init_after(self, mw):
 
-
-def nm_styled_edit_current__init__(self, mw):
-
-	if nm_state_on:
+	if nm_state_on and nm_enable_in_dialogs:
 		self.setStyleSheet(nm_dialog_css())
 
 		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons())
 		self.form.fieldsArea.setStyleSheet(nm_css_qt_mid_buttons)
-
+		self.form.fieldsArea.setAutoFillBackground(False)
 		self.editor.tags.completer.popup().setStyleSheet(nm_css_completer)
 
 		nm_style_fields(self.editor)
 
-		global nm_default_editor
 
-		if not nm_default_editor:
-			nm_default_editor = self.editor
+def take_care_of_night_class():
 
-		self.editor.checkValid = wrap(self.editor.checkValid, nm_check_valid)
+	if nm_state_on:
+		javascript = """
+		current_classes = document.body.className;
+		if (current_classes.indexOf("night_mode") == -1)
+		{
+			document.body.className += " night_mode";
+		}
+		"""
+	else:
+		javascript = """
+		current_classes = document.body.className;
+		if (current_classes.indexOf("night_mode") != -1)
+		{
+			document.body.className = current_classes.replace("night_mode","");
+		}
+		"""
+
+	mw.reviewer.web.eval(javascript)
 
 
 def nm_onload():
@@ -236,12 +262,14 @@ def nm_onload():
 	"""
 	addHook("unloadProfile", nm_save)
 	addHook("profileLoaded", nm_load)
+	addHook("showQuestion", take_care_of_night_class)
+	addHook("showAnswer", take_care_of_night_class)
 
 	nm_setup_menu()
 
-	#TODO doc
-
-	EditCurrent.__init__ = wrap(EditCurrent.__init__, nm_styled_edit_current__init__)
+	Editor.checkValid = wrap(Editor.checkValid, nm_style_fields)
+	EditCurrent.__init__ = wrap(EditCurrent.__init__, nm_edit_current_init_after)
+	AddCards.__init__ = wrap(AddCards.__init__, nm_edit_current_init_after)
 
 
 def nm_append_to_styles(bottom='', body='', top='', decks='',
@@ -270,7 +298,6 @@ def nm_append_to_styles(bottom='', body='', top='', decks='',
 	mw.overview._css = nm_default_css_overview + overview
 	mw.overview.bottom._css = nm_default_css_overview_bottom + other_bottoms
 	mw.sharedCSS = nm_default_css_waiting_screen + waiting_screen
-
 
 	# Reload current screen.
 	if mw.state == "review":
@@ -315,10 +342,33 @@ def nm_switch():
 	"""
 	Switch night mode.
 	"""
-	if nm_state_on:
-		nm_off()
+
+	# Implementation of "setStyleSheet" method in QT is bugged.
+	# At some circumstances it causes a seg fault, without throwing any exceptions.
+	# So the switch of mode is not allowed when the problematic dialogs are visible.
+
+	is_active_dialog = filter(bool, [x[1] for x in dialogs._dialogs.values()])
+
+	if is_active_dialog:
+		info = _("Night mode can not be switched when the dialogs are open")
+		showWarning(info)
+		print info
 	else:
-		nm_on()
+		if nm_state_on:
+			nm_off()
+		else:
+			nm_on()
+
+
+def nm_endial():
+	"""
+	Switch for night mode in dialogs
+	"""
+	global nm_enable_in_dialogs
+	if nm_enable_in_dialogs:
+		nm_enable_in_dialogs = False
+	else:
+		nm_enable_in_dialogs = True
 
 
 def nm_refresh():
@@ -337,7 +387,7 @@ def nm_setup_menu():
 	(shared with other plugins, like "Zoom" of R. Sieker) options of
 	Night Mode will be putted there. In other case it creates that menu.
 	"""
-	global nm_menu_switch, nm_menu_iimage, nm_menu_ilatex
+	global nm_menu_switch, nm_menu_iimage, nm_menu_ilatex, nm_menu_endial
 
 	try:
 		mw.addon_view_menu
@@ -353,6 +403,7 @@ def nm_setup_menu():
 	nm_menu_switch = QAction(_('&Enable night mode'), mw, checkable=True)
 	nm_menu_iimage = QAction(_('&Invert images'), mw, checkable=True)
 	nm_menu_ilatex = QAction(_('Invert &latex'), mw, checkable=True)
+	nm_menu_endial = QAction(_('Enable in &dialogs'), mw, checkable=True)
 	nm_menu_color_b = QAction(_('Set &background color'), mw)
 	nm_menu_color_t = QAction(_('Set &text color'), mw)
 	nm_menu_color_r = QAction(_('&Reset colors'), mw)
@@ -362,6 +413,7 @@ def nm_setup_menu():
 	nm_menu_switch.setShortcut(mw_toggle_seq)
 
 	mw.nm_menu.addAction(nm_menu_switch)
+	mw.nm_menu.addAction(nm_menu_endial)
 	mw.nm_menu.addSeparator()
 	mw.nm_menu.addAction(nm_menu_iimage)
 	mw.nm_menu.addAction(nm_menu_ilatex)
@@ -373,6 +425,7 @@ def nm_setup_menu():
 	mw.nm_menu.addAction(nm_menu_about)
 
 	s = SIGNAL("triggered()")
+	mw.connect(nm_menu_endial, s, nm_endial)
 	mw.connect(nm_menu_switch, s, nm_switch)
 	mw.connect(nm_menu_iimage, s, nm_iimage)
 	mw.connect(nm_menu_ilatex, s, nm_ilatex)
@@ -410,21 +463,21 @@ def nm_message_box_css():
 			"QPushButton {  min-width: 70px }" )
 
 
-def nm_css_qt_buttons(restric_to=""):
+def nm_css_qt_buttons(restrict_to=""):
 	return """
-	""" + restric_to + """ QPushButton
+	""" + restrict_to + """ QPushButton
 	{
 		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
 		box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
 		border-radius: 3px;
 		""" + nm_css_button_idle + """
 	}
-	""" + restric_to + """ QPushButton:hover
+	""" + restrict_to + """ QPushButton:hover
 	{
 		""" + nm_css_button_hover + """
 		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #4C5A64, stop: 0.04 #404F5A, stop: 1 #2E3940);
 	}
-	""" + restric_to + """ QPushButton:pressed
+	""" + restrict_to + """ QPushButton:pressed
 	{
 		""" + nm_css_button_active + """
 		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #20282D, stop: 0.51 #252E34, stop: 1 #222A30);
@@ -437,11 +490,13 @@ def nm_dialog_css():
 	Generate and return CSS style of AnkiQt Dialogs,
 	using global color declarations
 	"""
-	return ("QDialog,QLabel {	color:" + nm_color_t + ";" +
-			"background-color:" + nm_color_b + "}" +
-			"QFontComboBox, QCheckBox, QSpinBox, QRadioButton{background-color:" + nm_color_b + ";color:" + nm_color_t + "}" + """
+	return ("""
+			QDialog,QLabel,QListWidget,QFontComboBox,QCheckBox,QSpinBox,QRadioButton,QHBoxLayout
+			{
+				color: """ + nm_color_t + """;
+				background-color: """ + nm_color_b + """;
+			}
 			QFontComboBox::drop-down{border: 0px; border-left: 1px solid #555; width: 30px;}
-
 			QFontComboBox::down-arrow{width:12px; height:8px; image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wUNEzoHsJsFBAAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAADbSURBVBjTXY0xSgNRFEXP/TMTJugebFKKmCKN29KFSAxWgusIKFjZamEliEoWoE0g8//MuzZRYk57z+HqOXthmCYRBgs89EgVAYTAgAMssUxfDRfAa5iCKTaFik6mk8mYHCYnePuuWcg2TxuOVDNXMIrtixLePmCzyT3nszGrBDBt+Uw9cyWKEoVEISgSxSJ74Ho2ZgWQ2HLSch9mmUSWyQMUB5ng7rTl4df7CwAOG24YeE+QK9EhPg4abnedf8EEumHEZSTWAeuouZpAt+vINvu89JwBHNc87m8//tFrm27x7RcAAAAASUVORK5CYII=);}
 			QFontComboBox, QSpinBox{border: 1px solid #555;}
 
