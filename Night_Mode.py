@@ -23,7 +23,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
