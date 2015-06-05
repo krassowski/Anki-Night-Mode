@@ -38,7 +38,12 @@ from anki.hooks import wrap
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QAction, QKeySequence, QMenu, \
 						QColorDialog, QMessageBox, QColor
+from PyQt4 import QtCore
 
+try:
+	nm_from_utf8 = QtCore.QString.fromUtf8
+except AttributeError:
+	nm_from_utf8 = lambda s: s
 
 # This declarations are there only to be sure that in case of troubles
 # with "profileLoaded" hook everything will work.
@@ -220,13 +225,25 @@ def nm_style_fields(editor):
 		editor.web.eval(javascript)
 
 
+def nm_set_style_to_objects_inside(layout, style):
+	for i in range(layout .count()):
+		layout.itemAt(i).widget().setStyleSheet(style)
+
+
 def nm_edit_current_init_after(self, mw):
 
 	if nm_state_on and nm_enable_in_dialogs:
 		self.setStyleSheet(nm_dialog_css())
 
 		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons())
-		self.form.fieldsArea.setStyleSheet(nm_css_qt_mid_buttons)
+		if hasattr(self.form, "horizontalLayout"):
+			nm_set_style_to_objects_inside(self.form.horizontalLayout, nm_css_qt_buttons())
+		if hasattr(self.form, "line"):
+			self.form.line.setStyleSheet("#" + nm_from_utf8("line") + "{border: 0px solid #333;}")
+
+		self.form.fieldsArea.setStyleSheet(nm_css_qt_mid_buttons +
+											nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("fields")) +
+											nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("layout")))
 		self.form.fieldsArea.setAutoFillBackground(False)
 		self.editor.tags.completer.popup().setStyleSheet(nm_css_completer)
 
@@ -255,6 +272,18 @@ def take_care_of_night_class():
 	mw.reviewer.web.eval(javascript)
 
 
+def nm_encode_class_name(string):
+	return "ID"+"".join(map(str, map(ord, string)))
+
+
+def nm_add_button_name(self, name, *args, **kwargs):
+	original_function = kwargs.pop('_old')
+	button = original_function(self, name, *args, **kwargs)
+	if name:
+		button.setObjectName(nm_encode_class_name(name))
+	return button
+
+
 def nm_onload():
 	"""
 	Add hooks and initialize menu.
@@ -267,6 +296,8 @@ def nm_onload():
 
 	nm_setup_menu()
 
+
+	Editor._addButton = wrap(Editor._addButton, nm_add_button_name, "around")
 	Editor.checkValid = wrap(Editor.checkValid, nm_style_fields)
 	EditCurrent.__init__ = wrap(EditCurrent.__init__, nm_edit_current_init_after)
 	AddCards.__init__ = wrap(AddCards.__init__, nm_edit_current_init_after)
@@ -463,21 +494,21 @@ def nm_message_box_css():
 			"QPushButton {  min-width: 70px }" )
 
 
-def nm_css_qt_buttons(restrict_to=""):
+def nm_css_qt_buttons(restrict_to_parent="", restrict_to=""):
 	return """
-	""" + restrict_to + """ QPushButton
+	""" + restrict_to_parent + """ QPushButton""" + restrict_to + """
 	{
 		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
 		box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
 		border-radius: 3px;
 		""" + nm_css_button_idle + """
 	}
-	""" + restrict_to + """ QPushButton:hover
+	""" + restrict_to_parent + """ QPushButton""" + restrict_to + """:hover
 	{
 		""" + nm_css_button_hover + """
 		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #4C5A64, stop: 0.04 #404F5A, stop: 1 #2E3940);
 	}
-	""" + restrict_to + """ QPushButton:pressed
+	""" + restrict_to_parent + """ QPushButton""" + restrict_to + """:pressed
 	{
 		""" + nm_css_button_active + """
 		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #20282D, stop: 0.51 #252E34, stop: 1 #222A30);
