@@ -28,7 +28,8 @@ __version__ = "1.0.8"
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
 from aqt.addcards import AddCards
-from aqt.editor import Editor
+from aqt.editor import Editor, EditorWebView
+from aqt.clayout import CardLayout
 from aqt.utils import showWarning
 
 from anki.lang import _
@@ -217,10 +218,9 @@ def nm_style_fields(editor):
 				$("#f"+i).css("background-color", "DarkOrange");
 			}
 		}
+		$("a").css("color", "#00BBFF")
+		$(".fname").css("color", '""" + nm_color_t + """')
 		"""
-
-		editor.web.eval('$(".fname").css("color", "' + nm_color_t + '")')
-		editor.web.eval('$("a").css("color", "#00BBFF")')
 
 		editor.web.eval(javascript)
 
@@ -235,6 +235,8 @@ def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
 	if nm_state_on and nm_enable_in_dialogs:
 
 		editor_css = nm_dialog_css()
+
+
 		editor_css += "#" + widget.objectName() + '{' + nm_text_and_background() + '}'
 
 		self.parentWindow.setStyleSheet(editor_css)
@@ -244,6 +246,22 @@ def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
 		widget.setStyleSheet(nm_css_qt_mid_buttons +
 							nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("fields")) +
 							nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("layout")))
+
+
+def nm_editor_web_view_set_html_after(self, *args, **kwargs):
+
+	css = ""
+
+	if nm_invert_image:
+		css += ".field" + nm_css_iimage
+	if nm_invert_latex:
+		css += ".field" + nm_css_ilatex
+
+	javascript = "var node=document.createElement('style');"
+	javascript += "node.innerHTML='" + css.replace("\n", ' ') + "';"
+	javascript += "document.body.appendChild(node);"
+
+	self.eval(javascript)
 
 
 def nm_edit_current_init_after(self, mw):
@@ -262,7 +280,10 @@ def nm_add_init_after(self, mw):
 		self.form.fieldsArea.setAutoFillBackground(False)
 
 
-def take_care_of_night_class():
+def take_care_of_night_class(web_object=None):
+
+	if not web_object:
+		web_object = mw.reviewer.web
 
 	if nm_state_on:
 		javascript = """
@@ -281,7 +302,7 @@ def take_care_of_night_class():
 		}
 		"""
 
-	mw.reviewer.web.eval(javascript)
+	web_object.eval(javascript)
 
 
 def nm_encode_class_name(string):
@@ -296,6 +317,12 @@ def nm_add_button_name(self, name, *args, **kwargs):
 	return button
 
 
+def nm_render_preview_after(card_layout):
+
+	take_care_of_night_class(card_layout.tab['pform'].frontWeb)
+	take_care_of_night_class(card_layout.tab['pform'].backWeb)
+
+
 def nm_onload():
 	"""
 	Add hooks and initialize menu.
@@ -308,12 +335,15 @@ def nm_onload():
 
 	nm_setup_menu()
 
-
 	Editor._addButton = wrap(Editor._addButton, nm_add_button_name, "around")
 	Editor.checkValid = wrap(Editor.checkValid, nm_style_fields)
 	Editor.__init__ = wrap(Editor.__init__, nm_editor_init_after)
+	EditorWebView.setHtml = wrap(EditorWebView.setHtml, nm_editor_web_view_set_html_after)
+
 	EditCurrent.__init__ = wrap(EditCurrent.__init__, nm_edit_current_init_after)
 	AddCards.__init__ = wrap(AddCards.__init__, nm_add_init_after)
+	CardLayout.renderPreview = wrap(CardLayout.renderPreview, nm_render_preview_after)
+
 
 
 def nm_append_to_styles(bottom='', body='', top='', decks='',
@@ -622,6 +652,7 @@ button:active
 }
 """
 
+# TODO
 nm_css_completer = """
 	background-color:black;
 	border-color:#444;
