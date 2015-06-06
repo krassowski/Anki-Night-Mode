@@ -23,7 +23,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.7"
+__version__ = "1.0.8"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -230,24 +230,36 @@ def nm_set_style_to_objects_inside(layout, style):
 		layout.itemAt(i).widget().setStyleSheet(style)
 
 
+def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
+
+	if nm_state_on and nm_enable_in_dialogs:
+
+		editor_css = nm_dialog_css()
+		editor_css += "#" + widget.objectName() + '{' + nm_text_and_background() + '}'
+
+		self.parentWindow.setStyleSheet(editor_css)
+
+		self.tags.completer.popup().setStyleSheet(nm_css_completer)
+
+		widget.setStyleSheet(nm_css_qt_mid_buttons +
+							nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("fields")) +
+							nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("layout")))
+
+
 def nm_edit_current_init_after(self, mw):
 
 	if nm_state_on and nm_enable_in_dialogs:
-		self.setStyleSheet(nm_dialog_css())
+		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons())
+
+
+def nm_add_init_after(self, mw):
+
+	if nm_state_on and nm_enable_in_dialogs:
 
 		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons())
-		if hasattr(self.form, "horizontalLayout"):
-			nm_set_style_to_objects_inside(self.form.horizontalLayout, nm_css_qt_buttons())
-		if hasattr(self.form, "line"):
-			self.form.line.setStyleSheet("#" + nm_from_utf8("line") + "{border: 0px solid #333;}")
-
-		self.form.fieldsArea.setStyleSheet(nm_css_qt_mid_buttons +
-											nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("fields")) +
-											nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("layout")))
+		nm_set_style_to_objects_inside(self.form.horizontalLayout, nm_css_qt_buttons())
+		self.form.line.setStyleSheet("#" + nm_from_utf8("line") + "{border: 0px solid #333;}")
 		self.form.fieldsArea.setAutoFillBackground(False)
-		self.editor.tags.completer.popup().setStyleSheet(nm_css_completer)
-
-		nm_style_fields(self.editor)
 
 
 def take_care_of_night_class():
@@ -299,8 +311,9 @@ def nm_onload():
 
 	Editor._addButton = wrap(Editor._addButton, nm_add_button_name, "around")
 	Editor.checkValid = wrap(Editor.checkValid, nm_style_fields)
+	Editor.__init__ = wrap(Editor.__init__, nm_editor_init_after)
 	EditCurrent.__init__ = wrap(EditCurrent.__init__, nm_edit_current_init_after)
-	AddCards.__init__ = wrap(AddCards.__init__, nm_edit_current_init_after)
+	AddCards.__init__ = wrap(AddCards.__init__, nm_add_init_after)
 
 
 def nm_append_to_styles(bottom='', body='', top='', decks='',
@@ -499,7 +512,6 @@ def nm_css_qt_buttons(restrict_to_parent="", restrict_to=""):
 	""" + restrict_to_parent + """ QPushButton""" + restrict_to + """
 	{
 		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
-		box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
 		border-radius: 3px;
 		""" + nm_css_button_idle + """
 	}
@@ -516,6 +528,12 @@ def nm_css_qt_buttons(restrict_to_parent="", restrict_to=""):
 	"""
 
 
+# TODO rewrite redundant code with this function or even better, keep in memory generated string and change it only
+# TODO when the colour is changed.
+def nm_text_and_background():
+	return 'color:' + nm_color_t + ';background-color:' + nm_color_b + ';'
+
+
 def nm_dialog_css():
 	"""
 	Generate and return CSS style of AnkiQt Dialogs,
@@ -524,8 +542,7 @@ def nm_dialog_css():
 	return ("""
 			QDialog,QLabel,QListWidget,QFontComboBox,QCheckBox,QSpinBox,QRadioButton,QHBoxLayout
 			{
-				color: """ + nm_color_t + """;
-				background-color: """ + nm_color_b + """;
+			""" + nm_text_and_background() + """
 			}
 			QFontComboBox::drop-down{border: 0px; border-left: 1px solid #555; width: 30px;}
 			QFontComboBox::down-arrow{width:12px; height:8px; image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wUNEzoHsJsFBAAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAADbSURBVBjTXY0xSgNRFEXP/TMTJugebFKKmCKN29KFSAxWgusIKFjZamEliEoWoE0g8//MuzZRYk57z+HqOXthmCYRBgs89EgVAYTAgAMssUxfDRfAa5iCKTaFik6mk8mYHCYnePuuWcg2TxuOVDNXMIrtixLePmCzyT3nszGrBDBt+Uw9cyWKEoVEISgSxSJ74Ho2ZgWQ2HLSch9mmUSWyQMUB5ng7rTl4df7CwAOG24YeE+QK9EhPg4abnedf8EEumHEZSTWAeuouZpAt+vINvu89JwBHNc87m8//tFrm27x7RcAAAAASUVORK5CYII=);}
@@ -564,13 +581,11 @@ def nm_dialog_css():
 # Thanks to http://devgrow.com/dark-button-navigation-using-css3/
 nm_css_button_idle = """
 	color: #AFB9C1;
-	text-shadow: 1px 1px #1f272b;
 	margin-top: 0;
 	position:relative;
 	top: 0;
 	outline: 0;
 	padding: 3px 8px;
-	display: inline-block;
 	border: 1px solid #3E474D;
 	border-top-color: #1c252b;
 	border-left-color: #2d363c;
@@ -588,6 +603,8 @@ nm_css_buttons = """
 button
 {
 	""" + nm_css_button_idle + """
+	text-shadow: 1px 1px #1f272b;
+	display: inline-block;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#3D4850), color-stop(4%,#313d45), color-stop(100%,#232B30));
 	-webkit-box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
 	-webkit-border-radius: 3px;
@@ -621,7 +638,6 @@ QLineEdit
 QPushButton
 {
 	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #8E99AA, stop: 0.04 #828E96, stop: 1 #747C8A);
-	box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
 	border-radius: 3px;
 	""" + nm_css_button_idle + """
 	color: #000;
