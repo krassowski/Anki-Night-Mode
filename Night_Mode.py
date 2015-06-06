@@ -30,6 +30,7 @@ from aqt.editcurrent import EditCurrent
 from aqt.addcards import AddCards
 from aqt.editor import Editor, EditorWebView
 from aqt.clayout import CardLayout
+from aqt.browser import Browser
 from aqt.utils import showWarning
 
 from anki.lang import _
@@ -323,6 +324,12 @@ def nm_render_preview_after(card_layout):
 	take_care_of_night_class(card_layout.tab['pform'].backWeb)
 
 
+def nm_edit_render_preview_after(browser, cardChanged=False):
+	if not browser._previewWindow:
+		return
+	take_care_of_night_class(browser._previewWeb)
+
+
 def nm_onload():
 	"""
 	Add hooks and initialize menu.
@@ -339,7 +346,7 @@ def nm_onload():
 	Editor.checkValid = wrap(Editor.checkValid, nm_style_fields)
 	Editor.__init__ = wrap(Editor.__init__, nm_editor_init_after)
 	EditorWebView.setHtml = wrap(EditorWebView.setHtml, nm_editor_web_view_set_html_after)
-
+	Browser._renderPreview = wrap(Browser._renderPreview, nm_edit_render_preview_after)
 	EditCurrent.__init__ = wrap(EditCurrent.__init__, nm_edit_current_init_after)
 	AddCards.__init__ = wrap(AddCards.__init__, nm_add_init_after)
 	CardLayout.renderPreview = wrap(CardLayout.renderPreview, nm_render_preview_after)
