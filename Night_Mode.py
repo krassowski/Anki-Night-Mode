@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # Copyright: Michal Krassowski <krassowski.michal@gmail.com>
 # License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
@@ -23,14 +22,14 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.8"
+__version__ = "1.0.9"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
 from aqt.addcards import AddCards
 from aqt.editor import Editor, EditorWebView
 from aqt.clayout import CardLayout
-from aqt.browser import Browser
+from aqt.browser import Browser, COLOUR_MARKED, COLOUR_SUSPENDED
 from aqt.utils import showWarning
 
 from anki.lang import _
@@ -41,6 +40,7 @@ from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QAction, QKeySequence, QMenu, \
 						QColorDialog, QMessageBox, QColor
 from PyQt4 import QtCore
+from os.path import isfile
 
 try:
 	nm_from_utf8 = QtCore.QString.fromUtf8
@@ -54,10 +54,15 @@ nm_state_on = False
 nm_enable_in_dialogs = False
 nm_invert_image = False
 nm_invert_latex = False
+nm_profile_loaded = False
 
-nm_color_b = "#272828"
-nm_color_t = "#ffffff"
+nm_menu_iimage = None
+nm_menu_ilatex = None
 
+nm_color_b = "#272828"  # background color (customizable from menu)
+nm_color_s = "#373838"  # alternative (second) background color (hardcoded)
+nm_color_t = "#ffffff"  # text color (customizable from menu)
+nm_color_a = "#443477"  # active element color (hardcoded)
 
 # Save original values for further use.
 nm_default_css_menu = mw.styleSheet()
@@ -74,6 +79,8 @@ nm_default_css_overview_bottom = mw.overview.bottom._css
 # sharedCSS is only used for "Waiting for editing to finish." screen.
 nm_default_css_waiting_screen = mw.sharedCSS
 
+DEFLAULT_COLOUR_MARKED = COLOUR_MARKED
+DEFLAULT_COLOUR_SUSPENDED = COLOUR_SUSPENDED
 
 def nm_iimage():
 	"""
@@ -96,7 +103,7 @@ def nm_ilatex():
 	nm_refresh()
 
 
-def nm_color_t():
+def nm_change_color_t():
 	"""
 	Open color picker and set chosen color to text (in content)
 	"""
@@ -108,7 +115,7 @@ def nm_color_t():
 		nm_refresh()
 
 
-def nm_color_b():
+def nm_change_color_b():
 	"""
 	Open color picker and set chosen color to background (of content)
 	"""
@@ -164,7 +171,7 @@ def nm_load():
 	"""
 	global nm_menu_iimage, nm_menu_ilatex, nm_state_on, \
 		nm_invert_image, nm_invert_latex, nm_color_b, nm_color_t, \
-		nm_enable_in_dialogs
+		nm_enable_in_dialogs, nm_profile_loaded
 
 	try:
 		nm_state_on = mw.pm.profile['nm_state_on']
@@ -184,6 +191,8 @@ def nm_load():
 		nm_enable_in_dialogs = mw.pm.profile['nm_enable_in_dialogs']
 	except KeyError:
 		nm_enable_in_dialogs = False
+
+	nm_profile_loaded = True
 
 	if nm_state_on:
 		nm_on()
@@ -237,7 +246,6 @@ def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
 
 		editor_css = nm_dialog_css()
 
-
 		editor_css += "#" + widget.objectName() + '{' + nm_text_and_background() + '}'
 
 		self.parentWindow.setStyleSheet(editor_css)
@@ -269,6 +277,44 @@ def nm_edit_current_init_after(self, mw):
 
 	if nm_state_on and nm_enable_in_dialogs:
 		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons())
+
+
+def nm_browser_init_after(self, mw):
+
+	if nm_state_on and nm_enable_in_dialogs:
+
+		x = self.styleSheet()
+		self.setStyleSheet(x + nm_css_menu + nm_css_browser())
+		self.toolbar._css += nm_css_top
+		self.toolbar.draw()
+
+		self.form.tableView.setStyleSheet(nm_browser_table_css())
+		self.form.tableView.horizontalHeader().setStyleSheet(nm_browser_table_header_css())
+
+		self.form.searchEdit.setStyleSheet(nm_browser_search_box_css())
+		self.form.searchButton.setStyleSheet(nm_css_qt_buttons())
+		self.form.previewButton.setStyleSheet(nm_css_qt_buttons())
+
+
+def nm_browser_card_info_after(self, _old):
+
+	rep, cs = _old(self)
+
+	if nm_state_on and nm_enable_in_dialogs:
+		rep += """
+			<style>
+			*
+			{
+				""" + nm_text_and_background() + """
+			}
+			div
+			{
+				border-color: #fff!important
+			}
+			""" + nm_css_color_replacer + """
+			</style>
+			"""
+	return rep, cs
 
 
 def nm_add_init_after(self, mw):
@@ -335,6 +381,7 @@ def nm_onload():
 	Add hooks and initialize menu.
 	Call to this function is placed on the end of this file.
 	"""
+
 	addHook("unloadProfile", nm_save)
 	addHook("profileLoaded", nm_load)
 	addHook("showQuestion", take_care_of_night_class)
@@ -342,11 +389,13 @@ def nm_onload():
 
 	nm_setup_menu()
 
+	Browser.__init__ = wrap(Browser.__init__, nm_browser_init_after)
 	Editor._addButton = wrap(Editor._addButton, nm_add_button_name, "around")
 	Editor.checkValid = wrap(Editor.checkValid, nm_style_fields)
 	Editor.__init__ = wrap(Editor.__init__, nm_editor_init_after)
 	EditorWebView.setHtml = wrap(EditorWebView.setHtml, nm_editor_web_view_set_html_after)
 	Browser._renderPreview = wrap(Browser._renderPreview, nm_edit_render_preview_after)
+	Browser._cardInfoData = wrap(Browser._cardInfoData, nm_browser_card_info_after, "around")
 	EditCurrent.__init__ = wrap(EditCurrent.__init__, nm_edit_current_init_after)
 	AddCards.__init__ = wrap(AddCards.__init__, nm_add_init_after)
 	CardLayout.renderPreview = wrap(CardLayout.renderPreview, nm_render_preview_after)
@@ -396,28 +445,55 @@ def nm_on():
 	"""
 	Turn on night mode.
 	"""
-	global nm_state_on
-	nm_state_on = True
-	nm_append_to_styles(nm_css_bottom,
-						nm_css_body + nm_card_color_css(),
-						nm_css_top,
-						nm_css_decks + nm_body_color_css(),
-						nm_css_other_bottoms,
-						nm_css_overview + nm_body_color_css(),
-						nm_css_menu,
-						nm_css_buttons + nm_body_color_css())
-	nm_menu_switch.setChecked(True)
+	if not nm_profile_loaded:
+		showWarning(NM_ERROR_NO_PROFILE)
+		return False
 
+	global nm_state_on
+
+	try:
+		nm_state_on = True
+
+		import aqt.browser
+		aqt.browser.COLOUR_MARKED = "#735083"
+		aqt.browser.COLOUR_SUSPENDED = "#777750"
+
+		nm_append_to_styles(nm_css_bottom,
+							nm_css_body + nm_card_color_css(),
+							nm_css_top,
+							nm_css_decks + nm_body_color_css(),
+							nm_css_other_bottoms,
+							nm_css_overview + nm_body_color_css(),
+							nm_css_menu,
+							nm_css_buttons + nm_body_color_css())
+		nm_menu_switch.setChecked(True)
+		return True
+	except:
+		showWarning(NM_ERROR_SWITCH)
+		return False
 
 def nm_off():
 	"""
 	Turn off night mode.
 	"""
-	global nm_state_on
-	nm_state_on = False
-	nm_append_to_styles()
-	nm_menu_switch.setChecked(False)
+	if not nm_profile_loaded:
+		showWarning(NM_ERROR_NO_PROFILE)
+		return False
 
+	try:
+		global nm_state_on
+		nm_state_on = False
+
+		import aqt.browser
+		aqt.browser.COLOUR_MARKED = DEFLAULT_COLOUR_MARKED
+		aqt.browser.COLOUR_SUSPENDED = DEFLAULT_COLOUR_SUSPENDED
+
+		nm_append_to_styles()
+		nm_menu_switch.setChecked(False)
+		return True
+	except:
+		showWarning(NM_ERROR_SWITCH)
+		return False
 
 def nm_switch():
 	"""
@@ -510,8 +586,8 @@ def nm_setup_menu():
 	mw.connect(nm_menu_switch, s, nm_switch)
 	mw.connect(nm_menu_iimage, s, nm_iimage)
 	mw.connect(nm_menu_ilatex, s, nm_ilatex)
-	mw.connect(nm_menu_color_b, s, nm_color_b)
-	mw.connect(nm_menu_color_t, s, nm_color_t)
+	mw.connect(nm_menu_color_b, s, nm_change_color_b)
+	mw.connect(nm_menu_color_t, s, nm_change_color_t)
 	mw.connect(nm_menu_color_r, s, nm_color_reset)
 	mw.connect(nm_menu_about, s, nm_about)
 
@@ -565,8 +641,9 @@ def nm_css_qt_buttons(restrict_to_parent="", restrict_to=""):
 	"""
 
 
-# TODO rewrite redundant code with this function or even better, keep in memory generated string and change it only
-# TODO when the colour is changed.
+# TODO rewrite redundant code with this function or even better,
+# keep in memory generated string and change it only when the colour is changed.
+
 def nm_text_and_background():
 	return 'color:' + nm_color_t + ';background-color:' + nm_color_b + ';'
 
@@ -576,13 +653,16 @@ def nm_dialog_css():
 	Generate and return CSS style of AnkiQt Dialogs,
 	using global color declarations
 	"""
-	return ("""
+	return """
 			QDialog,QLabel,QListWidget,QFontComboBox,QCheckBox,QSpinBox,QRadioButton,QHBoxLayout
 			{
 			""" + nm_text_and_background() + """
 			}
 			QFontComboBox::drop-down{border: 0px; border-left: 1px solid #555; width: 30px;}
-			QFontComboBox::down-arrow{width:12px; height:8px; image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wUNEzoHsJsFBAAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAADbSURBVBjTXY0xSgNRFEXP/TMTJugebFKKmCKN29KFSAxWgusIKFjZamEliEoWoE0g8//MuzZRYk57z+HqOXthmCYRBgs89EgVAYTAgAMssUxfDRfAa5iCKTaFik6mk8mYHCYnePuuWcg2TxuOVDNXMIrtixLePmCzyT3nszGrBDBt+Uw9cyWKEoVEISgSxSJ74Ho2ZgWQ2HLSch9mmUSWyQMUB5ng7rTl4df7CwAOG24YeE+QK9EhPg4abnedf8EEumHEZSTWAeuouZpAt+vINvu89JwBHNc87m8//tFrm27x7RcAAAAASUVORK5CYII=);}
+			QFontComboBox::down-arrow{width:12px; height:8px;
+				top: 1px;
+				image: url(""" + NM_DOWN_ARROW_ICON_PATH + """);
+			}
 			QFontComboBox, QSpinBox{border: 1px solid #555;}
 
 			QTabWidget QWidget
@@ -609,7 +689,89 @@ def nm_dialog_css():
 				margin-top:-7px;
 			}
 			""" + nm_css_qt_buttons("QTabWidget")
-			)
+
+
+def nm_browser_table_css():
+	return """
+		QTableView
+		{
+			alternate-background-color: """ + nm_color_s + """;
+			gridline-color: """ + nm_color_s + """;
+			""" + nm_text_and_background() + """
+			selection-background-color: """ + nm_color_a + """
+		}
+		"""
+
+
+def nm_browser_table_header_css():
+	return """
+		QHeaderView::section
+		{
+			""" + nm_text_and_background() + """
+			border: 1px solid """ + nm_color_s + """;
+		}
+		"""
+
+
+def nm_browser_search_box_css():
+	return """
+	QComboBox
+	{
+		border: 1px solid """ + nm_color_s + """;
+		border-radius: 3px;
+		padding: 0px 4px;
+		""" + nm_text_and_background() + """
+	}
+
+	QComboBox:!editable
+	{
+		background: """ + nm_color_a + """
+	}
+
+	QComboBox QAbstractItemView
+	{
+		border: 1px solid #111;
+		""" + nm_text_and_background() + """
+		background: #444;
+	}
+
+	QComboBox::drop-down, QComboBox::drop-down:editable
+	{
+		""" + nm_text_and_background() + """
+		width: 24px;
+		border-left: 1px solid #444;
+		border-top-right-radius: 3px;
+		border-bottom-right-radius: 3px;
+		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
+	}
+
+	QComboBox::down-arrow
+	{
+		top: 1px;
+		image: url(""" + NM_DOWN_ARROW_ICON_PATH + """);
+	}
+	"""
+
+
+def nm_css_browser():
+	return """
+	QSplitter::handle
+	{
+		background:#000000
+	}
+	#""" + nm_from_utf8("widget") + """, QTreeView
+	{
+		""" + nm_text_and_background() + """
+	}
+	QTreeView::item:selected:active, QTreeView::branch:selected:active
+	{
+		background: """ + nm_color_a + """
+	}
+	QTreeView::item:selected:!active, QTreeView::branch:selected:!active
+	{
+		background: """ + nm_color_a + """
+	}
+	"""
 
 #
 # GLOBAL CSS STYLES SECTION
@@ -694,17 +856,17 @@ QPushButton:pressed
 """
 
 nm_css_color_replacer = """
-font[color="#007700"]
+font[color="#007700"], span[style="color:#070"]
 {
-	color:#00CC00
+	color:#00CC00!important
 }
-font[color="#000099"]
+font[color="#000099"], span[style="color:#00F"]
 {
-	color:#00BBFF
+	color:#00BBFF!important
 }
-font[color="#C35617"]
+font[color="#C35617"], span[style="color:#c00"]
 {
-	color:#D46728
+	color:#D46728!important
 }
 font[color="#00a"]
 {
@@ -712,7 +874,7 @@ font[color="#00a"]
 }
 """
 
-nm_css_bottom =  nm_css_buttons + nm_css_color_replacer + """
+nm_css_bottom = nm_css_buttons + nm_css_color_replacer + """
 body
 {
 	background: -webkit-gradient(linear, left top, left bottom, from(#333), to(#222));
@@ -840,7 +1002,7 @@ img#star
 }
 """
 
-nm_css_decks = nm_css_buttons +  nm_css_color_replacer + """
+nm_css_decks = nm_css_buttons + nm_css_color_replacer + """
 .current
 {
 	background-color: rgba(0,0,0,0.5);
@@ -892,7 +1054,7 @@ QMenuBar::item
 }
 QMenuBar::item:selected
 {
-	background-color: rgb(30,30,30)!important;
+	background-color: """ + nm_color_a + """!important;
 	border-top-left-radius: 6px;
 	border-top-right-radius: 6px;
 }
@@ -902,7 +1064,7 @@ QMenu
 }
 QMenu::item::selected
 {
-	background-color: rgb(30,30,30);
+	background-color: """ + nm_color_a + """;
 }
 QMenu::item
 {
@@ -911,6 +1073,32 @@ QMenu::item
 }
 """
 
+NM_ERROR_NO_PROFILE = """Switching night mode failed: The profile is not loaded yet.
+Probably it's a bug of Anki or you tried to switch mode to quickly."""
+
+NM_ERROR_SWITCH = """Switching night mode failed: Something went really really wrong.
+Contact add-on author to get help."""
+
+
+where_to_look_for_arrow_icon = [
+	'/usr/share/icons/Adwaita/scalable/actions/pan-down-symbolic.svg',
+	'/usr/share/icons/gnome/scalable/actions/go-down-symbolic.svg',
+	'/usr/share/icons/ubuntu-mobile/actions/scalable/dropdown-menu.svg',
+	'/usr/share/icons/Humanity/actions/16/down.svg',
+	'/usr/share/icons/Humanity/actions/16/go-down.svg',
+	'/usr/share/icons/Humanity/actions/16/stock_down.svg',
+	'/usr/share/icons/nuvola/16x16/actions/arrow-down.png',
+	'/usr/share/icons/default.kde4/16x16/actions/arrow-down.png'
+	]
+
+# It's not an arrow icon,
+# but on windows systems it's better to have this, than nothing.
+NM_DOWN_ARROW_ICON_PATH = ':/icons/gears.png'
+
+for path in where_to_look_for_arrow_icon:
+	if isfile(path):
+		NM_DOWN_ARROW_ICON_PATH = path
+		break
 
 #
 # ONLOAD SECTION
