@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.0.9"
+__version__ = "1.1.0"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -463,7 +463,7 @@ def nm_on():
 							nm_css_top,
 							nm_css_decks + nm_body_color_css(),
 							nm_css_other_bottoms,
-							nm_css_overview + nm_body_color_css(),
+							nm_css_overview() + nm_body_color_css(),
 							nm_css_menu,
 							nm_css_buttons + nm_body_color_css())
 		nm_menu_switch.setChecked(True)
@@ -705,7 +705,7 @@ def nm_browser_table_css():
 
 def nm_browser_table_header_css():
 	return """
-		QHeaderView::section
+		QHeaderView, QHeaderView::section
 		{
 			""" + nm_text_and_background() + """
 			border: 1px solid """ + nm_color_s + """;
@@ -872,6 +872,7 @@ font[color="#00a"]
 {
 	color:#00BBFF
 }
+
 """
 
 nm_css_bottom = nm_css_buttons + nm_css_color_replacer + """
@@ -1003,6 +1004,10 @@ img#star
 """
 
 nm_css_decks = nm_css_buttons + nm_css_color_replacer + """
+a
+{
+    color: #0099CC
+}
 .current
 {
 	background-color: rgba(0,0,0,0.5);
@@ -1028,6 +1033,10 @@ tr.deck font[color="#000099"]
 {
 	color:#00BBFF
 }
+.filtered
+{
+    color: #00AAEE !important
+}
 """
 
 nm_css_other_bottoms = nm_css_buttons + """
@@ -1040,7 +1049,13 @@ nm_css_other_bottoms = nm_css_buttons + """
 }
 """
 
-nm_css_overview = nm_css_buttons + nm_css_color_replacer
+def nm_css_overview():
+    return nm_css_buttons + nm_css_color_replacer + """
+    .descfont
+    {
+        color: """ + nm_color_t +""";
+    }
+    """
 
 nm_css_menu = """
 QMenuBar,QMenu
