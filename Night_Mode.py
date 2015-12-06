@@ -1001,6 +1001,10 @@ img#star
 {
 	color: #5566ee!important;
 }
+a
+{
+    color: #0099CC
+}
 """
 
 nm_css_decks = nm_css_buttons + nm_css_color_replacer + """
