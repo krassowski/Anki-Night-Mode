@@ -833,26 +833,6 @@ QLineEdit
 {
 """ + nm_css_completer + """
 }
-
-/*
-QPushButton
-{
-	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #8E99AA, stop: 0.04 #828E96, stop: 1 #747C8A);
-	border-radius: 3px;
-	""" + nm_css_button_idle + """
-	color: #000;
-}
-QPushButton:hover
-{
-	""" + nm_css_button_hover + """
-	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #9CAAB4, stop: 0.04 #909FAA, stop: 1 #7E8990);
-}
-QPushButton:pressed
-{
-	""" + nm_css_button_active + """
-	background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #70787D, stop: 0.51 #757E84, stop: 1 #727A80);
-}
-*/
 """
 
 nm_css_color_replacer = """
@@ -872,7 +852,6 @@ font[color="#00a"]
 {
 	color:#00BBFF
 }
-
 """
 
 nm_css_bottom = nm_css_buttons + nm_css_color_replacer + """
