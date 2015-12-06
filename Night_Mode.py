@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -251,10 +251,10 @@ def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
 
 def nm_editor_web_view_set_html_after(self, *args, **kwargs):
 
-	css = '';
+	css = ''
 
 	if nm_state_on and nm_enable_in_dialogs:
-		css += 'a{color:00BBFF}.fname,.field{color:' + nm_color_t + '}';
+		css += 'a{color:00BBFF}.fname,.field{color:' + nm_color_t + '}'
 
 	if nm_invert_image:
 		css += ".field" + nm_css_iimage
@@ -304,7 +304,7 @@ def nm_browser_card_info_after(self, _old):
 			}
 			div
 			{
-				border-color: #fff!important
+				border-color:#fff!important
 			}
 			""" + nm_css_color_replacer + """
 			</style>
@@ -318,7 +318,7 @@ def nm_add_init_after(self, mw):
 
 		self.form.buttonBox.setStyleSheet(nm_css_qt_buttons())
 		nm_set_style_to_objects_inside(self.form.horizontalLayout, nm_css_qt_buttons())
-		self.form.line.setStyleSheet("#" + nm_from_utf8("line") + "{border: 0px solid #333;}")
+		self.form.line.setStyleSheet("#" + nm_from_utf8("line") + "{border:0px solid #333}")
 		self.form.fieldsArea.setAutoFillBackground(False)
 
 
@@ -330,7 +330,7 @@ def take_care_of_night_class(web_object=None):
 	if nm_state_on:
 		javascript = """
 		current_classes = document.body.className;
-		if (current_classes.indexOf("night_mode") == -1)
+		if(current_classes.indexOf("night_mode") == -1)
 		{
 			document.body.className += " night_mode";
 		}
@@ -338,7 +338,7 @@ def take_care_of_night_class(web_object=None):
 	else:
 		javascript = """
 		current_classes = document.body.className;
-		if (current_classes.indexOf("night_mode") != -1)
+		if(current_classes.indexOf("night_mode") != -1)
 		{
 			document.body.className = current_classes.replace("night_mode","");
 		}
@@ -622,9 +622,9 @@ def nm_message_box_css():
 	Generate and return CSS style of class QMessageBox,
 	using global color declarations
 	"""
-	return ("QMessageBox,QLabel {	color:" + nm_color_t + ";" +
+	return ("QMessageBox,QLabel {color:" + nm_color_t + ";" +
 			"background-color:" + nm_color_b + "}" + nm_css_qt_buttons() +
-			"QPushButton {  min-width: 70px }" )
+			"QPushButton {min-width:70px}" )
 
 
 def nm_css_qt_buttons(restrict_to_parent="", restrict_to=""):
@@ -660,33 +660,33 @@ def nm_dialog_css():
 			}
 			QFontComboBox::drop-down{border: 0px; border-left: 1px solid #555; width: 30px;}
 			QFontComboBox::down-arrow{width:12px; height:8px;
-				top: 1px;
-				image: url(""" + NM_DOWN_ARROW_ICON_PATH + """);
+				top:1px;
+				image:url(""" + NM_DOWN_ARROW_ICON_PATH + """)
 			}
-			QFontComboBox, QSpinBox{border: 1px solid #555;}
+			QFontComboBox, QSpinBox{border: 1px solid #555}
 
 			QTabWidget QWidget
 			{
-				color: """ + nm_color_t + """;
-				background-color: #222;
-				border-color: #555;
+				color:""" + nm_color_t + """;
+				background-color:#222;
+				border-color:#555
 			}
 			QTabWidget QLabel {
-				position:relative;
+				position:relative
 			}
 			QTabWidget QTabBar
 			{
-				color: #000
+				color:#000
 			}
 			QTabWidget QTextEdit
 			{
-				border-color: #555;
+				border-color:#555
 			}
 			QTabWidget QGroupBox::title
 			{
 				subcontrol-origin: margin;
 				subcontrol-position:top left;
-				margin-top:-7px;
+				margin-top:-7px
 			}
 			""" + nm_css_qt_buttons("QTabWidget")
 
@@ -695,8 +695,8 @@ def nm_browser_table_css():
 	return """
 		QTableView
 		{
-			alternate-background-color: """ + nm_color_s + """;
-			gridline-color: """ + nm_color_s + """;
+			alternate-background-color:""" + nm_color_s + """;
+			gridline-color:""" + nm_color_s + """;
 			""" + nm_css_custom_colors + """
 			selection-background-color: """ + nm_color_a + """
 		}
@@ -708,7 +708,7 @@ def nm_browser_table_header_css():
 		QHeaderView, QHeaderView::section
 		{
 			""" + nm_css_custom_colors + """
-			border: 1px solid """ + nm_color_s + """;
+			border:1px solid """ + nm_color_s + """
 		}
 		"""
 
@@ -717,38 +717,38 @@ def nm_browser_search_box_css():
 	return """
 	QComboBox
 	{
-		border: 1px solid """ + nm_color_s + """;
-		border-radius: 3px;
-		padding: 0px 4px;
+		border:1px solid """ + nm_color_s + """;
+		border-radius:3px;
+		padding:0px 4px;
 		""" + nm_css_custom_colors + """
 	}
 
 	QComboBox:!editable
 	{
-		background: """ + nm_color_a + """
+		background:""" + nm_color_a + """
 	}
 
 	QComboBox QAbstractItemView
 	{
-		border: 1px solid #111;
+		border:1px solid #111;
 		""" + nm_css_custom_colors + """
-		background: #444;
+		background:#444
 	}
 
 	QComboBox::drop-down, QComboBox::drop-down:editable
 	{
 		""" + nm_css_custom_colors + """
-		width: 24px;
-		border-left: 1px solid #444;
-		border-top-right-radius: 3px;
-		border-bottom-right-radius: 3px;
-		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
+		width:24px;
+		border-left:1px solid #444;
+		border-top-right-radius:3px;
+		border-bottom-right-radius:3px;
+		background:qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #3D4850, stop: 0.04 #313d45, stop: 1 #232B30);
 	}
 
 	QComboBox::down-arrow
 	{
-		top: 1px;
-		image: url(""" + NM_DOWN_ARROW_ICON_PATH + """);
+		top:1px;
+		image: url(""" + NM_DOWN_ARROW_ICON_PATH + """)
 	}
 	"""
 
@@ -757,7 +757,7 @@ def nm_css_browser():
 	return """
 	QSplitter::handle
 	{
-		background:#000000
+		background:#000
 	}
 	#""" + nm_from_utf8("widget") + """, QTreeView
 	{
@@ -765,11 +765,11 @@ def nm_css_browser():
 	}
 	QTreeView::item:selected:active, QTreeView::branch:selected:active
 	{
-		background: """ + nm_color_a + """
+		background:""" + nm_color_a + """
 	}
 	QTreeView::item:selected:!active, QTreeView::branch:selected:!active
 	{
-		background: """ + nm_color_a + """
+		background:""" + nm_color_a + """
 	}
 	"""
 
@@ -779,45 +779,45 @@ def nm_css_browser():
 
 # Thanks to http://devgrow.com/dark-button-navigation-using-css3/
 nm_css_button_idle = """
-	color: #AFB9C1;
-	margin-top: 0;
+	color:#AFB9C1;
+	margin-top:0;
 	position:relative;
-	top: 0;
-	outline: 0;
-	padding: 3px 8px;
-	border: 1px solid #3E474D;
-	border-top-color: #1c252b;
-	border-left-color: #2d363c;
+	top:0;
+	outline:0;
+	padding:3px 8px;
+	border:1px solid #3E474D;
+	border-top-color:#1c252b;
+	border-left-color:#2d363c;
 """
 
 nm_css_button_hover = """
-	color: #fff;
+	color:#fff;
 """
 
 nm_css_button_active = """
-	color: #fff;
+	color:#fff;
 """
 
 nm_css_buttons = """
 button
 {
 	""" + nm_css_button_idle + """
-	text-shadow: 1px 1px #1f272b;
-	display: inline-block;
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#3D4850), color-stop(4%,#313d45), color-stop(100%,#232B30));
-	-webkit-box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
-	-webkit-border-radius: 3px;
+	text-shadow:1px 1px #1f272b;
+	display:inline-block;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(3%,#3D4850), color-stop(4%,#313d45), color-stop(100%,#232B30));
+	-webkit-box-shadow:1px 1px 1px rgba(0,0,0,0.1);
+	-webkit-border-radius:3px
 }
 button:hover
 {
 	""" + nm_css_button_hover + """
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#4C5A64), color-stop(4%,#404F5A), color-stop(100%,#2E3940));
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(3%,#4C5A64), color-stop(4%,#404F5A), color-stop(100%,#2E3940));
 }
 button:active
 {
 	""" + nm_css_button_active + """
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(3%,#20282D), color-stop(51%,#252E34), color-stop(100%,#222A30));
-	-webkit-box-shadow: 1px 1px 1px rgba(255,255,255,0.1);
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(3%,#20282D), color-stop(51%,#252E34), color-stop(100%,#222A30));
+	-webkit-box-shadow:1px 1px 1px rgba(255,255,255,0.1);
 }
 """
 
@@ -836,15 +836,15 @@ QLineEdit
 """
 
 nm_css_color_replacer = """
-font[color="#007700"], span[style="color:#070"]
+font[color="#007700"],span[style="color:#070"]
 {
 	color:#00CC00!important
 }
-font[color="#000099"], span[style="color:#00F"]
+font[color="#000099"],span[style="color:#00F"]
 {
 	color:#00BBFF!important
 }
-font[color="#C35617"], span[style="color:#c00"]
+font[color="#C35617"],span[style="color:#c00"]
 {
 	color:#D46728!important
 }
@@ -857,29 +857,29 @@ font[color="#00a"]
 nm_css_bottom = nm_css_buttons + nm_css_color_replacer + """
 body
 {
-	background: -webkit-gradient(linear, left top, left bottom, from(#333), to(#222));
-	border-top-color: #000;
+	background:-webkit-gradient(linear, left top, left bottom, from(#333), to(#222));
+	border-top-color:#000
 }
 button
 {
-	min-width: 70px;
+	min-width:70px
 }
 .hitem
 {
-	margin-top: -20px;
+	margin-top:-20px
 }
 .stat
 {
-	padding-top: 0;
+	padding-top:0
 }
 .stat2
 {
-	padding-top: 0;
+	padding-top:0
 }
 .stattxt
 {
-	height: 6px;
-	display:block;
+	height:6px;
+	display:block
 }
 .stattxt
 {
@@ -887,20 +887,20 @@ button
 }
 .nobold
 {
-	display: block;
-	padding-top: 0;
-	height: 7px;
+	display:block;
+	padding-top:0;
+	height:7px;
 	color:#ddd
 }
 .spacer
 {
 	position:relative;
-	top:-8px;
+	top:-8px
 }
 .spacer2
 {
 	position:relative;
-	top:-8px;
+	top:-8px
 }
 button
 {
@@ -915,30 +915,30 @@ button:active
 nm_css_top = """
 html
 {
-	background: -webkit-gradient(linear, left top, left bottom, from(#333), to(#444));
-	color:#eee;
+	background:-webkit-gradient(linear, left top, left bottom, from(#333), to(#444));
+	color:#eee
 }
 body
 {
-	border-bottom-color:#111;
+	border-bottom-color:#111
 }
 .hitem
 {
-	color: #ddd;
+	color:#ddd
 }
 """
 
 nm_css_ilatex = """
 .latex
 {
-	-webkit-filter: invert(100%);
+	-webkit-filter:invert(100%)
 }
 """
 
 nm_css_iimage = """
 img
 {
-	-webkit-filter: invert(100%);
+	-webkit-filter:invert(100%)
 }
 """
 
@@ -948,56 +948,56 @@ nm_css_body = """
 {
 	background-color:black!important;
 	border-color:#444!important;
-	color:#eee!important;
+	color:#eee!important
 }
 .typeGood
 {
 	color:black;
-	background:#57a957;
+	background:#57a957
 }
 .typeBad
 {
 	color:black;
-	background:#c43c35;
+	background:#c43c35
 }
 .typeMissed
 {
 	color:black;
-	background:#ccc;
+	background:#ccc
 }
 #answer
 {
-	height: 0;
-	border: 0;
+	height:0;
+	border:0;
 	border-bottom: 2px solid #333;
-	border-top: 2px solid black;
+	border-top: 2px solid black
 }
 img#star
 {
-	-webkit-filter: invert(0%)!important;
+	-webkit-filter:invert(0%)!important
 }
 .cloze
 {
-	color: #5566ee!important;
+	color:#5566ee!important
 }
 a
 {
-    color: #0099CC
+    color:#0099CC
 }
 """
 
 nm_css_decks = nm_css_buttons + nm_css_color_replacer + """
 a
 {
-    color: #0099CC
+    color:#0099CC
 }
 .current
 {
-	background-color: rgba(0,0,0,0.5);
+	background-color:rgba(0,0,0,0.5)
 }
 a.deck
 {
-	color: #efe
+	color:#efe
 }
 tr.deck td
 {
@@ -1006,7 +1006,7 @@ tr.deck td
 }
 tr.deck button img
 {
-	-webkit-filter: invert(20%);
+	-webkit-filter:invert(20%)
 }
 tr.deck font[color="#007700"]
 {
@@ -1018,7 +1018,7 @@ tr.deck font[color="#000099"]
 }
 .filtered
 {
-    color: #00AAEE !important
+    color:#00AAEE!important
 }
 """
 
@@ -1026,9 +1026,9 @@ nm_css_other_bottoms = nm_css_buttons + """
 #header
 {
 	color:#ccc!important;
-	background: -webkit-gradient(linear, left top, left bottom, from(#333), to(#222));
-	border-top-color: #000;
-	height:40px;
+	background:-webkit-gradient(linear, left top, left bottom, from(#333), to(#222));
+	border-top-color:#000;
+	height:40px
 }
 """
 
@@ -1036,38 +1036,38 @@ def nm_css_overview():
     return nm_css_buttons + nm_css_color_replacer + """
     .descfont
     {
-        color: """ + nm_color_t +""";
+        color:""" + nm_color_t +""";
     }
     """
 
 nm_css_menu = """
 QMenuBar,QMenu
 {
-	background-color: #444!important;
-	color: #eee!important;
+	background-color:#444!important;
+	color:#eee!important
 }
 QMenuBar::item
 {
-	background-color: transparent;
+	background-color:transparent
 }
 QMenuBar::item:selected
 {
-	background-color: """ + nm_color_a + """!important;
-	border-top-left-radius: 6px;
-	border-top-right-radius: 6px;
+	background-color:""" + nm_color_a + """!important;
+	border-top-left-radius:6px;
+	border-top-right-radius:6px
 }
 QMenu
 {
-	border: 1px solid #111;
+	border:1px solid #111
 }
 QMenu::item::selected
 {
-	background-color: """ + nm_color_a + """;
+	background-color:""" + nm_color_a + """;
 }
 QMenu::item
 {
-	padding: 3px 25px 3px 25px;
-	border: 1px solid transparent;
+	padding:3px 25px 3px 25px;
+	border:1px solid transparent
 }
 """
 
