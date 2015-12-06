@@ -186,6 +186,8 @@ def nm_load():
 		nm_color_b = "#272828"
 		nm_color_t = "#ffffff"
 
+	nm_refresh_css_custom_colors_string()
+
 	# placed in other handler to keep compatibility with current users profiles
 	try:
 		nm_enable_in_dialogs = mw.pm.profile['nm_enable_in_dialogs']
@@ -246,7 +248,7 @@ def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
 
 		editor_css = nm_dialog_css()
 
-		editor_css += "#" + widget.objectName() + '{' + nm_text_and_background() + '}'
+		editor_css += "#" + widget.objectName() + '{' + nm_css_custom_colors + '}'
 
 		self.parentWindow.setStyleSheet(editor_css)
 
@@ -305,7 +307,7 @@ def nm_browser_card_info_after(self, _old):
 			<style>
 			*
 			{
-				""" + nm_text_and_background() + """
+				""" + nm_css_custom_colors + """
 			}
 			div
 			{
@@ -381,6 +383,8 @@ def nm_onload():
 	Add hooks and initialize menu.
 	Call to this function is placed on the end of this file.
 	"""
+
+	nm_refresh_css_custom_colors_string()
 
 	addHook("unloadProfile", nm_save)
 	addHook("profileLoaded", nm_load)
@@ -530,12 +534,17 @@ def nm_endial():
 
 def nm_refresh():
 	"""
-	Refresh display by reenabling night or normal mode.
+	Refresh display by reenabling night or normal mode,
+	regenerate customizable css strings.
 	"""
+
+	nm_refresh_css_custom_colors_string()
+
 	if nm_state_on:
 		nm_on()
 	else:
 		nm_off()
+
 
 
 def nm_setup_menu():
@@ -592,6 +601,11 @@ def nm_setup_menu():
 	mw.connect(nm_menu_about, s, nm_about)
 
 
+def nm_refresh_css_custom_colors_string():
+	global nm_css_custom_colors
+	nm_css_custom_colors = 'color:' + nm_color_t + ';background-color:' + nm_color_b + ';'
+
+
 def nm_card_color_css():
 	"""
 	Generate and return CSS style of class "card",
@@ -641,13 +655,6 @@ def nm_css_qt_buttons(restrict_to_parent="", restrict_to=""):
 	"""
 
 
-# TODO rewrite redundant code with this function or even better,
-# keep in memory generated string and change it only when the colour is changed.
-
-def nm_text_and_background():
-	return 'color:' + nm_color_t + ';background-color:' + nm_color_b + ';'
-
-
 def nm_dialog_css():
 	"""
 	Generate and return CSS style of AnkiQt Dialogs,
@@ -656,7 +663,7 @@ def nm_dialog_css():
 	return """
 			QDialog,QLabel,QListWidget,QFontComboBox,QCheckBox,QSpinBox,QRadioButton,QHBoxLayout
 			{
-			""" + nm_text_and_background() + """
+			""" + nm_css_custom_colors + """
 			}
 			QFontComboBox::drop-down{border: 0px; border-left: 1px solid #555; width: 30px;}
 			QFontComboBox::down-arrow{width:12px; height:8px;
@@ -697,7 +704,7 @@ def nm_browser_table_css():
 		{
 			alternate-background-color: """ + nm_color_s + """;
 			gridline-color: """ + nm_color_s + """;
-			""" + nm_text_and_background() + """
+			""" + nm_css_custom_colors + """
 			selection-background-color: """ + nm_color_a + """
 		}
 		"""
@@ -707,7 +714,7 @@ def nm_browser_table_header_css():
 	return """
 		QHeaderView, QHeaderView::section
 		{
-			""" + nm_text_and_background() + """
+			""" + nm_css_custom_colors + """
 			border: 1px solid """ + nm_color_s + """;
 		}
 		"""
@@ -720,7 +727,7 @@ def nm_browser_search_box_css():
 		border: 1px solid """ + nm_color_s + """;
 		border-radius: 3px;
 		padding: 0px 4px;
-		""" + nm_text_and_background() + """
+		""" + nm_css_custom_colors + """
 	}
 
 	QComboBox:!editable
@@ -731,13 +738,13 @@ def nm_browser_search_box_css():
 	QComboBox QAbstractItemView
 	{
 		border: 1px solid #111;
-		""" + nm_text_and_background() + """
+		""" + nm_css_custom_colors + """
 		background: #444;
 	}
 
 	QComboBox::drop-down, QComboBox::drop-down:editable
 	{
-		""" + nm_text_and_background() + """
+		""" + nm_css_custom_colors + """
 		width: 24px;
 		border-left: 1px solid #444;
 		border-top-right-radius: 3px;
@@ -761,7 +768,7 @@ def nm_css_browser():
 	}
 	#""" + nm_from_utf8("widget") + """, QTreeView
 	{
-		""" + nm_text_and_background() + """
+		""" + nm_css_custom_colors + """
 	}
 	QTreeView::item:selected:active, QTreeView::branch:selected:active
 	{
