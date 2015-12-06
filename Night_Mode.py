@@ -35,6 +35,7 @@ from aqt.utils import showWarning
 from anki.lang import _
 from anki.hooks import addHook
 from anki.hooks import wrap
+from anki.utils import json
 
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QAction, QKeySequence, QMenu, \
@@ -213,28 +214,17 @@ def nm_style_fields(editor):
 
 	if nm_state_on and nm_enable_in_dialogs:
 
-		l = str(len(editor.note.fields))
-
-		# change colors only if the card is not marked or the bg color is changed in card styles
-		javascript = """
-		for (var i=0; i < """ + l + """; i++) {
-			bg_color = $("#f"+i).css("background-color")
-			if (bg_color == "rgb(255, 255, 255)")
-			{
-				$("#f"+i).css("color", '""" + nm_color_t + """');
-				$("#f"+i).css("background-color", '""" + nm_color_b + """');
-			}
-			else if (bg_color == "rgb(255, 204, 204)")
-			{
-				$("#f"+i).css("color", "black");
-				$("#f"+i).css("background-color", "DarkOrange");
-			}
-		}
-		$("a").css("color", "#00BBFF")
-		$(".fname").css("color", '""" + nm_color_t + """')
-		"""
-
-		editor.web.eval(javascript)
+		cols = []
+		err = None
+		for f in editor.note.fields:
+			cols.append(nm_color_b)
+		err = editor.note.dupeOrEmpty()
+		if err == 2:
+			cols[0] = "#A96D06"
+			editor.web.eval("showDupes();")
+		else:
+			editor.web.eval("hideDupes();")
+		editor.web.eval("setBackgrounds(%s);" % json.dumps(cols))
 
 
 def nm_set_style_to_objects_inside(layout, style):
@@ -261,7 +251,10 @@ def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
 
 def nm_editor_web_view_set_html_after(self, *args, **kwargs):
 
-	css = ""
+	css = '';
+
+	if nm_state_on and nm_enable_in_dialogs:
+		css += 'a{color:00BBFF}.fname,.field{color:' + nm_color_t + '}';
 
 	if nm_invert_image:
 		css += ".field" + nm_css_iimage
