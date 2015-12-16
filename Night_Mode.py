@@ -931,14 +931,16 @@ body
 nm_css_ilatex = """
 .latex
 {
-	-webkit-filter:invert(100%)
+	filter:invert(1);
+	-webkit-filter:invert(1)
 }
 """
 
 nm_css_iimage = """
 img
 {
-	-webkit-filter:invert(100%)
+	filter:invert(1);
+	-webkit-filter:invert(1)
 }
 """
 
