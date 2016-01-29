@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -995,7 +995,7 @@ a
 {
 	background-color:rgba(0,0,0,0.5)
 }
-a.deck
+a.deck, .collapse
 {
 	color:#efe
 }
