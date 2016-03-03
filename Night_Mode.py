@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.1.3"
+__version__ = "1.1.4"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -652,6 +652,10 @@ def nm_css_qt_buttons(restrict_to_parent="", restrict_to=""):
 		""" + nm_css_button_active + """
 		background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #20282D, stop: 0.51 #252E34, stop: 1 #222A30);
 	}
+	""" + restrict_to_parent + """ QPushButton""" + restrict_to + """:focus
+	{
+		outline: 1px dotted #4a90d9
+	}
 	"""
 
 
@@ -793,7 +797,6 @@ nm_css_button_idle = """
 	margin-top:0;
 	position:relative;
 	top:0;
-	outline:0;
 	padding:3px 8px;
 	border:1px solid #3E474D;
 	border-top-color:#1c252b;
