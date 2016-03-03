@@ -38,8 +38,8 @@ from anki.hooks import wrap
 from anki.utils import json
 
 from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import QAction, QKeySequence, QMenu, \
-						QColorDialog, QMessageBox, QColor
+from PyQt4.QtGui import (QAction, QKeySequence, QMenu, QColorDialog,
+						QMessageBox, QColor)
 from PyQt4 import QtCore
 from os.path import isfile
 
@@ -57,8 +57,10 @@ nm_invert_image = False
 nm_invert_latex = False
 nm_profile_loaded = False
 
+nm_menu_switch = None
 nm_menu_iimage = None
 nm_menu_ilatex = None
+nm_menu_endial = None
 
 nm_color_b = "#272828"  # background color (customizable from menu)
 nm_color_s = "#373838"  # alternative (second) background color (hardcoded)
@@ -82,6 +84,7 @@ nm_default_css_waiting_screen = mw.sharedCSS
 
 DEFLAULT_COLOUR_MARKED = COLOUR_MARKED
 DEFLAULT_COLOUR_SUSPENDED = COLOUR_SUSPENDED
+
 
 def nm_iimage():
 	"""
@@ -398,7 +401,6 @@ def nm_onload():
 	CardLayout.renderPreview = wrap(CardLayout.renderPreview, nm_render_preview_after)
 
 
-
 def nm_append_to_styles(bottom='', body='', top='', decks='',
 						other_bottoms='', overview='', menu='',
 						waiting_screen=''):
@@ -469,6 +471,7 @@ def nm_on():
 		showWarning(NM_ERROR_SWITCH)
 		return False
 
+
 def nm_off():
 	"""
 	Turn off night mode.
@@ -491,6 +494,7 @@ def nm_off():
 	except:
 		showWarning(NM_ERROR_SWITCH)
 		return False
+
 
 def nm_switch():
 	"""
@@ -537,7 +541,6 @@ def nm_refresh():
 		nm_on()
 	else:
 		nm_off()
-
 
 
 def nm_setup_menu():
@@ -594,9 +597,13 @@ def nm_setup_menu():
 	mw.connect(nm_menu_about, s, nm_about)
 
 
+def nm_make_css_custom_colors_string():
+	return 'color:' + nm_color_t + ';background-color:' + nm_color_b + ';'
+
+
 def nm_refresh_css_custom_colors_string():
 	global nm_css_custom_colors
-	nm_css_custom_colors = 'color:' + nm_color_t + ';background-color:' + nm_color_b + ';'
+	nm_css_custom_colors = nm_make_css_custom_colors_string()
 
 
 def nm_card_color_css():
@@ -624,7 +631,7 @@ def nm_message_box_css():
 	"""
 	return ("QMessageBox,QLabel {color:" + nm_color_t + ";" +
 			"background-color:" + nm_color_b + "}" + nm_css_qt_buttons() +
-			"QPushButton {min-width:70px}" )
+			"QPushButton {min-width:70px}")
 
 
 def nm_css_qt_buttons(restrict_to_parent="", restrict_to=""):
@@ -776,6 +783,9 @@ def nm_css_browser():
 #
 # GLOBAL CSS STYLES SECTION
 #
+
+nm_css_custom_colors = nm_make_css_custom_colors_string()
+
 
 # Thanks to http://devgrow.com/dark-button-navigation-using-css3/
 nm_css_button_idle = """
@@ -984,14 +994,14 @@ img#star
 }
 a
 {
-    color:#0099CC
+	color:#0099CC
 }
 """
 
 nm_css_decks = nm_css_buttons + nm_css_color_replacer + """
 a
 {
-    color:#0099CC
+	color:#0099CC
 }
 .current
 {
@@ -1020,7 +1030,7 @@ tr.deck font[color="#000099"]
 }
 .filtered
 {
-    color:#00AAEE!important
+	color:#00AAEE!important
 }
 """
 
@@ -1034,13 +1044,14 @@ nm_css_other_bottoms = nm_css_buttons + """
 }
 """
 
+
 def nm_css_overview():
-    return nm_css_buttons + nm_css_color_replacer + """
-    .descfont
-    {
-        color:""" + nm_color_t +""";
-    }
-    """
+	return nm_css_buttons + nm_css_color_replacer + """
+	.descfont
+	{
+		color:""" + nm_color_t + """;
+	}
+	"""
 
 nm_css_menu = """
 QMenuBar,QMenu
