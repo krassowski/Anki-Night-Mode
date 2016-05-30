@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.1.4"
+__version__ = "1.1.5"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -47,6 +47,9 @@ try:
 	nm_from_utf8 = QtCore.QString.fromUtf8
 except AttributeError:
 	nm_from_utf8 = lambda s: s
+
+# Add here you color replacments mapping - old: new, comma seprarated
+nm_custom_color_map = {'#000000': 'white'}
 
 # This declarations are there only to be sure that in case of troubles
 # with "profileLoaded" hook everything will work.
@@ -84,6 +87,12 @@ nm_default_css_waiting_screen = mw.sharedCSS
 
 DEFLAULT_COLOUR_MARKED = COLOUR_MARKED
 DEFLAULT_COLOUR_SUSPENDED = COLOUR_SUSPENDED
+
+def nm_css_custom_color_map():
+    css = ''
+    for old, new in nm_custom_color_map.items():
+        css += 'font[color="' + old + '"]{color:' + new + '!important}'
+    return css
 
 
 def nm_iimage():
@@ -458,7 +467,7 @@ def nm_on():
 		aqt.browser.COLOUR_SUSPENDED = "#777750"
 
 		nm_append_to_styles(nm_css_bottom,
-							nm_css_body + nm_card_color_css(),
+							nm_css_body + nm_card_color_css() + nm_css_custom_color_map(),
 							nm_css_top,
 							nm_css_decks + nm_body_color_css(),
 							nm_css_other_bottoms,
