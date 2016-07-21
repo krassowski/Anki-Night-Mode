@@ -22,7 +22,7 @@ License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.1.5"
+__version__ = "1.1.6"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -31,16 +31,27 @@ from aqt.editor import Editor, EditorWebView
 from aqt.clayout import CardLayout
 from aqt.browser import Browser, COLOUR_MARKED, COLOUR_SUSPENDED
 from aqt.utils import showWarning
+from aqt import appVersion
+
 
 from anki.lang import _
 from anki.hooks import addHook
 from anki.hooks import wrap
 from anki.utils import json
 
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import (QAction, QKeySequence, QMenu, QColorDialog,
-						QMessageBox, QColor)
-from PyQt4 import QtCore
+# Anki 2.1
+if appVersion.startswith('2.1'):
+	from PyQt5.QtCore import pyqtSignal
+	from PyQt5.QtWidgets import (QAction, QMenu, QColorDialog, QMessageBox)
+	from PyQt5.QtGui import(QKeySequence, QColor)
+	from PyQt5 import QtCore
+# Anki 2.0
+else:
+	from PyQt4.QtCore import SIGNAL
+	from PyQt4.QtGui import (QAction, QKeySequence, QMenu, QColorDialog,
+							 QMessageBox, QColor)
+	from PyQt4 import QtCore
+
 from os.path import isfile
 
 try:
@@ -89,10 +100,10 @@ DEFLAULT_COLOUR_MARKED = COLOUR_MARKED
 DEFLAULT_COLOUR_SUSPENDED = COLOUR_SUSPENDED
 
 def nm_css_custom_color_map():
-    css = ''
-    for old, new in nm_custom_color_map.items():
-        css += 'font[color="' + old + '"]{color:' + new + '!important}'
-    return css
+	css = ''
+	for old, new in nm_custom_color_map.items():
+		css += 'font[color="' + old + '"]{color:' + new + '!important}'
+	return css
 
 
 def nm_iimage():
@@ -260,6 +271,10 @@ def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
 							nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("fields")) +
 							nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("layout")))
 
+def nm_editor_loadFinished(self):
+	if nm_state_on and nm_enable_in_dialogs:
+		self.web.eval("setBG('%s')" % nm_color_b)
+
 
 def nm_editor_web_view_set_html_after(self, *args, **kwargs):
 
@@ -395,13 +410,16 @@ def nm_onload():
 	addHook("profileLoaded", nm_load)
 	addHook("showQuestion", take_care_of_night_class)
 	addHook("showAnswer", take_care_of_night_class)
-
 	nm_setup_menu()
 
 	Browser.__init__ = wrap(Browser.__init__, nm_browser_init_after)
 	Editor._addButton = wrap(Editor._addButton, nm_add_button_name, "around")
 	Editor.checkValid = wrap(Editor.checkValid, nm_style_fields)
 	Editor.__init__ = wrap(Editor.__init__, nm_editor_init_after)
+
+	# Anki 2.1 Deck Browser background colour
+	if appVersion.startswith('2.1'):
+		Editor._loadFinished = wrap(Editor._loadFinished, nm_editor_loadFinished)
 	EditorWebView.setHtml = wrap(EditorWebView.setHtml, nm_editor_web_view_set_html_after)
 	Browser._renderPreview = wrap(Browser._renderPreview, nm_edit_render_preview_after)
 	Browser._cardInfoData = wrap(Browser._cardInfoData, nm_browser_card_info_after, "around")
@@ -436,7 +454,7 @@ def nm_append_to_styles(bottom='', body='', top='', decks='',
 	mw.overview._css = nm_default_css_overview + overview
 	mw.overview.bottom._css = nm_default_css_overview_bottom + other_bottoms
 	mw.sharedCSS = nm_default_css_waiting_screen + waiting_screen
-
+	
 	# Reload current screen.
 	if mw.state == "review":
 		mw.reviewer._initWeb()
@@ -513,13 +531,12 @@ def nm_switch():
 	# Implementation of "setStyleSheet" method in QT is bugged.
 	# At some circumstances it causes a seg fault, without throwing any exceptions.
 	# So the switch of mode is not allowed when the problematic dialogs are visible.
-
 	is_active_dialog = filter(bool, [x[1] for x in dialogs._dialogs.values()])
 
-	if is_active_dialog:
+	if appVersion.startswith('2.0') and is_active_dialog:
 		info = _("Night mode can not be switched when the dialogs are open")
 		showWarning(info)
-		print info
+		print(info)
 	else:
 		if nm_state_on:
 			nm_off()
@@ -595,15 +612,27 @@ def nm_setup_menu():
 	mw.nm_menu.addSeparator()
 	mw.nm_menu.addAction(nm_menu_about)
 
-	s = SIGNAL("triggered()")
-	mw.connect(nm_menu_endial, s, nm_endial)
-	mw.connect(nm_menu_switch, s, nm_switch)
-	mw.connect(nm_menu_iimage, s, nm_iimage)
-	mw.connect(nm_menu_ilatex, s, nm_ilatex)
-	mw.connect(nm_menu_color_b, s, nm_change_color_b)
-	mw.connect(nm_menu_color_t, s, nm_change_color_t)
-	mw.connect(nm_menu_color_r, s, nm_color_reset)
-	mw.connect(nm_menu_about, s, nm_about)
+	# Anki 2.1
+	if appVersion.startswith('2.1'):
+		nm_menu_endial.triggered.connect(nm_endial)
+		nm_menu_switch.triggered.connect(nm_switch)
+		nm_menu_iimage.triggered.connect(nm_iimage)
+		nm_menu_ilatex.triggered.connect(nm_ilatex)
+		nm_menu_color_b.triggered.connect(nm_change_color_b)
+		nm_menu_color_t.triggered.connect(nm_change_color_t)
+		nm_menu_color_r.triggered.connect(nm_color_reset)
+		nm_menu_about.triggered.connect(nm_about)
+	# Anki 2.0
+	else:
+		s = SIGNAL("triggered()")
+		mw.connect(nm_menu_endial, s, nm_endial)
+		mw.connect(nm_menu_switch, s, nm_switch)
+		mw.connect(nm_menu_iimage, s, nm_iimage)
+		mw.connect(nm_menu_ilatex, s, nm_ilatex)
+		mw.connect(nm_menu_color_b, s, nm_change_color_b)
+		mw.connect(nm_menu_color_t, s, nm_change_color_t)
+		mw.connect(nm_menu_color_r, s, nm_color_reset)
+		mw.connect(nm_menu_about, s, nm_about)
 
 
 def nm_make_css_custom_colors_string():
@@ -877,7 +906,7 @@ font[color="#00a"]
 """
 
 nm_css_bottom = nm_css_buttons + nm_css_color_replacer + """
-body
+body, #outer
 {
 	background:-webkit-gradient(linear, left top, left bottom, from(#333), to(#222));
 	border-top-color:#000
@@ -935,12 +964,12 @@ button:active
 """
 
 nm_css_top = """
-html
+html, #header
 {
 	background:-webkit-gradient(linear, left top, left bottom, from(#333), to(#444));
 	color:#eee
 }
-body
+body, #header
 {
 	border-bottom-color:#111
 }
