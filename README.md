@@ -22,7 +22,9 @@ After enabling night mode, addon changes colors of menubar, toolbar, bottombars 
 You can download this addon by Anki.
 From menu select: `Tools >> Add-ons >> Browse && Install...` and into prompt put following code:
 
-**1496166067**
+```python
+1496166067
+```
 
 after clicking `ok` addon will be downloaded. Then you shall restart your Anki.
 
