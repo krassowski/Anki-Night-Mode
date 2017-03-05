@@ -19,10 +19,18 @@ Also, feel free to send me bug reports or feature requests.
 
 Copyright: Michal Krassowski <krassowski.michal@gmail.com>
 License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
+
+Special thanks to contributors: [github nickname (reason)]
+
+- b50 (initial compatibility with 2.1),
+- ankitest (compatibility with 1508882486),
+- omega3 (useful bug reports and suggestions)
+- colchizin
+- JulyMorning
 """
 
 __addon_name__ = "Night Mode"
-__version__ = "1.1.6"
+__version__ = "1.2.0"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -1162,7 +1170,7 @@ where_to_look_for_arrow_icon = [
     '/usr/share/icons/Humanity/actions/16/stock_down.svg',
     '/usr/share/icons/nuvola/16x16/actions/arrow-down.png',
     '/usr/share/icons/default.kde4/16x16/actions/arrow-down.png'
-    ]
+]
 
 # It's not an arrow icon,
 # but on windows systems it's better to have this, than nothing.
