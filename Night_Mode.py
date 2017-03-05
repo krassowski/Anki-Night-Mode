@@ -67,7 +67,7 @@ nm_custom_color_map = {'#000000': 'white'}
 # with "profileLoaded" hook everything will work.
 
 nm_state_on = False
-nm_enable_in_dialogs = False
+nm_enable_in_dialogs = True
 nm_invert_image = False
 nm_invert_latex = False
 nm_profile_loaded = False
@@ -217,7 +217,7 @@ def nm_load():
     try:
         nm_enable_in_dialogs = mw.pm.profile['nm_enable_in_dialogs']
     except KeyError:
-        nm_enable_in_dialogs = False
+        nm_enable_in_dialogs = True
 
     nm_profile_loaded = True
 
