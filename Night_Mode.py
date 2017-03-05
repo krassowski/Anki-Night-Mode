@@ -940,57 +940,11 @@ nm_css_bottom = nm_css_buttons + nm_css_color_replacer + """
 body, #outer
 {
     background:-webkit-gradient(linear, left top, left bottom, from(#333), to(#222));
-    border-top-color:#000
-}
-button
-{
-    min-width:70px
-}
-.hitem
-{
-    margin-top:-20px
-}
-.stat
-{
-    padding-top:0
-}
-.stat2
-{
-    padding-top:0
-}
-.stattxt
-{
-    height:6px;
-    display:block
+    border-top-color:#222
 }
 .stattxt
 {
     color:#ccc
-}
-.nobold
-{
-    display:block;
-    padding-top:0;
-    height:7px;
-    color:#ddd
-}
-.spacer
-{
-    position:relative;
-    top:-8px
-}
-.spacer2
-{
-    position:relative;
-    top:-8px
-}
-button
-{
-    top:-6px
-}
-button:active
-{
-    top:-7px
 }
 """
 
@@ -1002,7 +956,7 @@ html, #header
 }
 body, #header
 {
-    border-bottom-color:#111
+    border-bottom-color:#222
 }
 .hitem
 {
