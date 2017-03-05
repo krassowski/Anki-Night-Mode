@@ -39,6 +39,8 @@ from anki.lang import _
 from anki.hooks import addHook
 from anki.hooks import wrap
 from anki.utils import json
+from anki.latex import latexCmds
+
 
 # Anki 2.1
 if appVersion.startswith('2.1'):
@@ -60,7 +62,7 @@ try:
 except AttributeError:
     nm_from_utf8 = lambda s: s
 
-# Add here you color replacments mapping - old: new, comma seprarated
+# Add here you color replacements mapping - old: new, comma separated
 nm_custom_color_map = {'#000000': 'white'}
 
 # This declarations are there only to be sure that in case of troubles
@@ -70,12 +72,14 @@ nm_state_on = False
 nm_enable_in_dialogs = True
 nm_invert_image = False
 nm_invert_latex = False
+nm_transparent_latex = False
 nm_profile_loaded = False
 
 nm_menu_switch = None
 nm_menu_iimage = None
 nm_menu_ilatex = None
 nm_menu_endial = None
+nm_menu_tlatex = None
 
 nm_color_b = "#272828"  # background color (customizable from menu)
 nm_color_s = "#373838"  # alternative (second) background color (hardcoded)
@@ -99,6 +103,7 @@ nm_default_css_waiting_screen = mw.sharedCSS
 
 DEFLAULT_COLOUR_MARKED = COLOUR_MARKED
 DEFLAULT_COLOUR_SUSPENDED = COLOUR_SUSPENDED
+
 
 def nm_css_custom_color_map():
     css = ''
@@ -126,6 +131,35 @@ def nm_ilatex():
     global nm_invert_latex
     nm_invert_latex = not nm_invert_latex
     nm_refresh()
+
+
+def nm_tlatex():
+    """Toggles transparent latex generation.
+
+    See nm_make_latex_transparent() for details.
+    """
+    global nm_transparent_latex
+    nm_transparent_latex = not nm_transparent_latex
+    if nm_transparent_latex:
+        nm_make_latex_transparent()
+
+
+def nm_make_latex_transparent():
+    """Overwrite latex generation commands to use transparent images.
+
+    Already generated latex images won't be affected;
+    delete those manually from your media folder in order
+    to regenerate images in transparent version.
+    """
+    latexCmds[1] = [
+        "dvipng",
+        "-D", "200",
+        "-T", "tight",
+        "-bg", "Transparent",
+        "-z", "9",  # use maximal PNG compression
+        "tmp.dvi",
+        "-o", "tmp.png"
+    ]
 
 
 def nm_change_color_t():
@@ -185,6 +219,7 @@ def nm_save():
     mw.pm.profile['nm_enable_in_dialogs'] = nm_enable_in_dialogs
     mw.pm.profile['nm_invert_image'] = nm_invert_image
     mw.pm.profile['nm_invert_latex'] = nm_invert_latex
+    mw.pm.profile['nm_transparent_latex'] = nm_transparent_latex
     mw.pm.profile['nm_color_b'] = nm_color_b
     mw.pm.profile['nm_color_t'] = nm_color_t
 
@@ -196,28 +231,17 @@ def nm_load():
     """
     global nm_menu_iimage, nm_menu_ilatex, nm_state_on, \
         nm_invert_image, nm_invert_latex, nm_color_b, nm_color_t, \
-        nm_enable_in_dialogs, nm_profile_loaded
+        nm_enable_in_dialogs, nm_profile_loaded, nm_transparent_latex
 
-    try:
-        nm_state_on = mw.pm.profile['nm_state_on']
-        nm_invert_image = mw.pm.profile['nm_invert_image']
-        nm_invert_latex = mw.pm.profile['nm_invert_latex']
-        nm_color_b = mw.pm.profile['nm_color_b']
-        nm_color_t = mw.pm.profile['nm_color_t']
-    except KeyError:
-        nm_state_on = False
-        nm_invert_image = False
-        nm_invert_latex = False
-        nm_color_b = "#272828"
-        nm_color_t = "#ffffff"
+    nm_state_on = mw.pm.profile.get('nm_state_on', True)
+    nm_invert_image = mw.pm.profile.get('nm_invert_image', False)
+    nm_invert_latex = mw.pm.profile.get('nm_invert_latex', False)
+    nm_color_b = mw.pm.profile.get('nm_color_b', '#272828')
+    nm_color_t = mw.pm.profile.get('nm_color_t', '#ffffff')
+    nm_enable_in_dialogs = mw.pm.profile.get('nm_enable_in_dialogs', True)
+    nm_transparent_latex = mw.pm.profile.get('nm_transparent_latex', False)
 
     nm_refresh_css_custom_colors_string()
-
-    # placed in other handler to keep compatibility with current users profiles
-    try:
-        nm_enable_in_dialogs = mw.pm.profile['nm_enable_in_dialogs']
-    except KeyError:
-        nm_enable_in_dialogs = True
 
     nm_profile_loaded = True
 
@@ -233,13 +257,16 @@ def nm_load():
     if nm_enable_in_dialogs:
         nm_menu_endial.setChecked(True)
 
+    if nm_transparent_latex:
+        nm_menu_tlatex.setChecked(True)
+        nm_make_latex_transparent()
+
 
 def nm_style_fields(editor):
 
     if nm_state_on and nm_enable_in_dialogs:
 
         cols = []
-        err = None
         for f in editor.note.fields:
             cols.append(nm_color_b)
         err = editor.note.dupeOrEmpty()
@@ -262,15 +289,17 @@ def nm_editor_init_after(self, mw, widget, parentWindow, addMode=False):
 
         editor_css = nm_dialog_css()
 
-        editor_css += "#" + widget.objectName() + '{' + nm_css_custom_colors + '}'
+        editor_css += '#' + widget.objectName() + '{' + nm_css_custom_colors + '}'
 
         self.parentWindow.setStyleSheet(editor_css)
 
         self.tags.completer.popup().setStyleSheet(nm_css_completer)
 
-        widget.setStyleSheet(nm_css_qt_mid_buttons +
-                            nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("fields")) +
-                            nm_css_qt_buttons(restrict_to="#" + nm_encode_class_name("layout")))
+        widget.setStyleSheet(
+            nm_css_qt_mid_buttons +
+            nm_css_qt_buttons(restrict_to='#' + nm_encode_class_name('fields')) +
+            nm_css_qt_buttons(restrict_to='#' + nm_encode_class_name('layout'))
+        )
 
 
 def nm_editor_loadFinished(self):
@@ -304,9 +333,9 @@ def nm_editor_web_view_set_html_after(self, *args, **kwargs):
         css += 'a{color:00BBFF}.fname,.field{color:' + nm_color_t + '}'
 
     if nm_invert_image:
-        css += ".field " + nm_css_iimage
+        css += '.field ' + nm_css_iimage
     if nm_invert_latex:
-        css += ".field " + nm_css_ilatex
+        css += '.field ' + nm_css_ilatex
 
     javascript = "var node=document.createElement('style');"
     javascript += "node.innerHTML='" + css.replace("\n", ' ') + "';"
@@ -500,9 +529,7 @@ def nm_append_to_styles(bottom='', body='', top='', decks='',
 
 
 def nm_on():
-    """
-    Turn on night mode.
-    """
+    """Turn on night mode."""
     if not nm_profile_loaded:
         showWarning(NM_ERROR_NO_PROFILE)
         return False
@@ -516,14 +543,16 @@ def nm_on():
         aqt.browser.COLOUR_MARKED = "#735083"
         aqt.browser.COLOUR_SUSPENDED = "#777750"
 
-        nm_append_to_styles(nm_css_bottom,
-                            nm_css_body + nm_card_color_css() + nm_css_custom_color_map(),
-                            nm_css_top,
-                            nm_css_decks + nm_body_color_css(),
-                            nm_css_other_bottoms,
-                            nm_css_overview() + nm_body_color_css(),
-                            nm_css_menu,
-                            nm_css_buttons + nm_body_color_css())
+        nm_append_to_styles(
+            nm_css_bottom,
+            nm_css_body + nm_card_color_css() + nm_css_custom_color_map(),
+            nm_css_top,
+            nm_css_decks + nm_body_color_css(),
+            nm_css_other_bottoms,
+            nm_css_overview() + nm_body_color_css(),
+            nm_css_menu,
+            nm_css_buttons + nm_body_color_css()
+        )
         nm_menu_switch.setChecked(True)
         return True
     except:
@@ -532,9 +561,7 @@ def nm_on():
 
 
 def nm_off():
-    """
-    Turn off night mode.
-    """
+    """Turn off night mode."""
     if not nm_profile_loaded:
         showWarning(NM_ERROR_NO_PROFILE)
         return False
@@ -588,7 +615,7 @@ def nm_endial():
 
 def nm_refresh():
     """
-    Refresh display by reenabling night or normal mode,
+    Refresh display by re-enabling night or normal mode,
     regenerate customizable css strings.
     """
 
@@ -606,14 +633,17 @@ def nm_setup_menu():
     (shared with other plugins, like "Zoom" of R. Sieker) options of
     Night Mode will be putted there. In other case it creates that menu.
     """
-    global nm_menu_switch, nm_menu_iimage, nm_menu_ilatex, nm_menu_endial
+    global nm_menu_switch, nm_menu_iimage, nm_menu_ilatex, nm_menu_endial, nm_menu_tlatex
 
     try:
         mw.addon_view_menu
     except AttributeError:
         mw.addon_view_menu = QMenu(_(u"&View"), mw)
-        mw.form.menubar.insertMenu(mw.form.menuTools.menuAction(),
-                                    mw.addon_view_menu)
+
+        mw.form.menubar.insertMenu(
+            mw.form.menuTools.menuAction(),
+            mw.addon_view_menu
+        )
 
     mw.nm_menu = QMenu(_('&Night Mode'), mw)
 
@@ -623,6 +653,7 @@ def nm_setup_menu():
     nm_menu_iimage = QAction(_('&Invert images'), mw, checkable=True)
     nm_menu_ilatex = QAction(_('Invert &latex'), mw, checkable=True)
     nm_menu_endial = QAction(_('Enable in &dialogs'), mw, checkable=True)
+    nm_menu_tlatex = QAction(_('Force transparent latex'), mw, checkable=True)
     nm_menu_color_b = QAction(_('Set &background color'), mw)
     nm_menu_color_t = QAction(_('Set &text color'), mw)
     nm_menu_color_r = QAction(_('&Reset colors'), mw)
@@ -636,6 +667,7 @@ def nm_setup_menu():
     mw.nm_menu.addSeparator()
     mw.nm_menu.addAction(nm_menu_iimage)
     mw.nm_menu.addAction(nm_menu_ilatex)
+    mw.nm_menu.addAction(nm_menu_tlatex)
     mw.nm_menu.addSeparator()
     mw.nm_menu.addAction(nm_menu_color_b)
     mw.nm_menu.addAction(nm_menu_color_t)
@@ -643,27 +675,31 @@ def nm_setup_menu():
     mw.nm_menu.addSeparator()
     mw.nm_menu.addAction(nm_menu_about)
 
+    connections = {
+        nm_menu_endial: nm_endial,
+        nm_menu_switch: nm_switch,
+        nm_menu_iimage: nm_iimage,
+        nm_menu_ilatex: nm_ilatex,
+        nm_menu_tlatex: nm_tlatex,
+        nm_menu_color_b: nm_change_color_b,
+        nm_menu_color_t: nm_change_color_t,
+        nm_menu_color_r: nm_color_reset,
+        nm_menu_about: nm_about,
+    }
+
     # Anki 2.1
     if appVersion.startswith('2.1'):
-        nm_menu_endial.triggered.connect(nm_endial)
-        nm_menu_switch.triggered.connect(nm_switch)
-        nm_menu_iimage.triggered.connect(nm_iimage)
-        nm_menu_ilatex.triggered.connect(nm_ilatex)
-        nm_menu_color_b.triggered.connect(nm_change_color_b)
-        nm_menu_color_t.triggered.connect(nm_change_color_t)
-        nm_menu_color_r.triggered.connect(nm_color_reset)
-        nm_menu_about.triggered.connect(nm_about)
+        def connect(menu_entry, function):
+            menu_entry.triggered.connect(function)
     # Anki 2.0
     else:
         s = SIGNAL("triggered()")
-        mw.connect(nm_menu_endial, s, nm_endial)
-        mw.connect(nm_menu_switch, s, nm_switch)
-        mw.connect(nm_menu_iimage, s, nm_iimage)
-        mw.connect(nm_menu_ilatex, s, nm_ilatex)
-        mw.connect(nm_menu_color_b, s, nm_change_color_b)
-        mw.connect(nm_menu_color_t, s, nm_change_color_t)
-        mw.connect(nm_menu_color_r, s, nm_color_reset)
-        mw.connect(nm_menu_about, s, nm_about)
+
+        def connect(menu_entry, function):
+            mw.connect(menu_entry, s, function)
+
+    for menu_entry, function in connections.items():
+        connect(menu_entry, function)
 
 
 def nm_make_css_custom_colors_string():
