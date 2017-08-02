@@ -47,7 +47,6 @@ from anki.lang import _
 from anki.hooks import addHook
 from anki.hooks import wrap
 from anki.utils import json
-from anki.latex import latexCmds
 
 
 # Anki 2.1
@@ -159,15 +158,26 @@ def nm_make_latex_transparent():
     delete those manually from your media folder in order
     to regenerate images in transparent version.
     """
-    latexCmds[1] = [
-        "dvipng",
-        "-D", "200",
-        "-T", "tight",
-        "-bg", "Transparent",
-        "-z", "9",  # use maximal PNG compression
-        "tmp.dvi",
-        "-o", "tmp.png"
-    ]
+    commands = []
+
+    if appVersion.startswith('2.1'):
+        from anki.latex import pngCommands
+        from anki.latex import svgCommands
+        commands.extend([pngCommands, svgCommands])
+    else:
+        from anki.latex import latexCmds
+        commands.append(latexCmds)
+
+    for command in commands:
+        command[1] = [
+            "dvipng",
+            "-D", "200",
+            "-T", "tight",
+            "-bg", "Transparent",
+            "-z", "9",  # use maximal PNG compression
+            "tmp.dvi",
+            "-o", "tmp.png"
+        ]
 
 
 def nm_change_color_t():
