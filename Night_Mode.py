@@ -28,15 +28,15 @@ Special thanks to contributors: [github nickname (reason)]
 - colchizin
 - JulyMorning
 """
+import traceback
 
 __addon_name__ = "Night Mode"
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
 from aqt.addcards import AddCards
 from aqt.editor import Editor, EditorWebView
-from aqt.webview import AnkiWebView
 from aqt.clayout import CardLayout
 from aqt.browser import Browser, COLOUR_MARKED, COLOUR_SUSPENDED
 from aqt.utils import showWarning
@@ -97,7 +97,11 @@ nm_color_a = "#443477"  # active element color (hardcoded)
 nm_default_css_menu = mw.styleSheet()
 
 nm_default_css_top = mw.toolbar._css
-nm_default_css_body = mw.reviewer._css
+if not appVersion.startswith('2.1'):
+    nm_default_css_body = mw.reviewer._css
+else:
+    nm_default_css_body = ''
+    nm_default_reviewer_html = mw.reviewer._revHtml
 nm_default_css_bottom = mw.reviewer._bottomCSS
 
 nm_default_css_decks = mw.deckBrowser._css
@@ -325,7 +329,7 @@ def nm_editor_loadFinished(self):
         self.web.eval("setBG('%s')" % nm_color_b)
 
 
-def nm_editor_web_view_stdHTML_around(self, *args, **kwargs):
+def nm_editor_web_view_stdHTML_around(*args, **kwargs):
     """For use in 2.1"""
     custom_css = ''
     original_function = kwargs.pop('_old')
@@ -333,14 +337,29 @@ def nm_editor_web_view_stdHTML_around(self, *args, **kwargs):
     if nm_state_on and nm_enable_in_dialogs:
         custom_css += nm_css_buttons + '.topbut{filter:invert(1); -webkit-filter:invert(1)}'
         custom_css += 'a{color:00BBFF}.fname,.field{color: ' + nm_color_t + '!important}'
+        custom_css += 'html,body{background:' + nm_color_b + '!important}'
 
     if nm_invert_image:
         custom_css += ".field " + nm_css_iimage
     if nm_invert_latex:
         custom_css += ".field " + nm_css_ilatex
 
+    args = list(args)
+
+    signature = inspect.signature(original_function)
+    i = 0
+    for name, parameter in signature.parameters.items():
+        if i >= len(args):
+            break
+        if parameter.default is not inspect._empty:
+            value = args.pop(i)
+            kwargs[name] = value
+        else:
+            i += 1
+
     kwargs['css'] = kwargs.get('css', '') + custom_css
-    return original_function(self, *args, **kwargs)
+
+    return original_function(*args, **kwargs)
 
 
 def nm_editor_web_view_set_html_after(self, *args, **kwargs):
@@ -495,7 +514,7 @@ def nm_onload():
 
     # Anki 2.1 Deck Browser background colour
     if appVersion.startswith('2.1'):
-        Editor._loadFinished = wrap(Editor._loadFinished, nm_editor_loadFinished)
+        # Editor._loadFinished = wrap(Editor._loadFinished, nm_editor_loadFinished)
         EditorWebView.stdHtml = wrap(EditorWebView.stdHtml, nm_editor_web_view_stdHTML_around, "around")
     else:
         EditorWebView.setHtml = wrap(EditorWebView.setHtml, nm_editor_web_view_set_html_after)
@@ -527,7 +546,12 @@ def nm_append_to_styles(bottom='', body='', top='', decks='',
     mw.setStyleSheet(nm_default_css_menu + menu)
     mw.toolbar._css = nm_default_css_top + top
     mw.reviewer._bottomCSS = nm_default_css_bottom + bottom
-    mw.reviewer._css = nm_default_css_body + body
+
+    if not appVersion.startswith('2.1'):
+        mw.reviewer._css = nm_default_css_body + body
+    else:
+        mw.reviewer._revHtml = nm_default_reviewer_html + '<style>' + body + '</style>'
+
     mw.deckBrowser._css = nm_default_css_decks + decks
     mw.deckBrowser.bottom._css = nm_default_css_decks_bottom + other_bottoms
     mw.overview._css = nm_default_css_overview + overview
@@ -573,8 +597,8 @@ def nm_on():
         )
         nm_menu_switch.setChecked(True)
         return True
-    except:
-        showWarning(NM_ERROR_SWITCH)
+    except Exception as e:
+        showWarning(NM_ERROR_SWITCH % traceback.format_exc())
         return False
 
 
@@ -595,8 +619,8 @@ def nm_off():
         nm_append_to_styles()
         nm_menu_switch.setChecked(False)
         return True
-    except:
-        showWarning(NM_ERROR_SWITCH)
+    except Exception as e:
+        showWarning(NM_ERROR_SWITCH % traceback.format_exc())
         return False
 
 
@@ -1168,7 +1192,11 @@ NM_ERROR_NO_PROFILE = """Switching night mode failed: The profile is not loaded 
 Probably it's a bug of Anki or you tried to switch mode to quickly."""
 
 NM_ERROR_SWITCH = """Switching night mode failed: Something went really really wrong.
-Contact add-on author to get help."""
+Contact add-on author to get help.
+
+Please provide following traceback when reporting the issue:
+%s
+"""
 
 
 where_to_look_for_arrow_icon = [
