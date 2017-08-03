@@ -31,7 +31,7 @@ Special thanks to contributors: [github nickname (reason)]
 import traceback
 
 __addon_name__ = "Night Mode"
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -345,6 +345,8 @@ def nm_editor_web_view_stdHTML_around(*args, **kwargs):
         custom_css += ".field " + nm_css_ilatex
 
     args = list(args)
+
+    import inspect
 
     signature = inspect.signature(original_function)
     i = 0
