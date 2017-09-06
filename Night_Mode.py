@@ -31,7 +31,7 @@ Special thanks to contributors: [github nickname (reason)]
 import traceback
 
 __addon_name__ = "Night Mode"
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 
 from aqt import mw, dialogs
 from aqt.editcurrent import EditCurrent
@@ -1025,6 +1025,11 @@ body, #outer
 .stattxt
 {
     color:#ccc
+}
+/* Make the color above "Again" "Hard" "Easy" and so on buttons readable */
+.nobold
+{
+    color:#ddd
 }
 """
 
