@@ -1,4 +1,5 @@
 import re
+from PyQt5 import QtCore
 from abc import abstractmethod, ABCMeta
 from inspect import isclass
 from types import MethodType
@@ -6,6 +7,12 @@ from types import MethodType
 from anki.hooks import wrap
 from anki.lang import _
 from aqt.utils import showWarning
+
+
+try:
+    from_utf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    from_utf8 = lambda s: s
 
 
 def alert(info):

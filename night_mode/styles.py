@@ -128,7 +128,8 @@ class SharedStyles(Style):
     def user_color_map(self):
         style = ''
         for old, new in self.config.user_color_map.items():
-            style += f'font[color="{old}"]{{color: "{new}"!important}}'
+            if old and new:
+                style += f'font[color="{old}"]{{color: {new}!important}}'
         return style
 
 

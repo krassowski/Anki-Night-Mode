@@ -1,19 +1,29 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QColorDialog
 
-from .internals import Setting, MenuAction, alert
+from .internals import Setting, MenuAction
+from .color_map import ColorMapWindow
 
 
-# TODO: include in menu
 class UserColorMap(Setting, MenuAction):
     value = {'#000000': 'white'}
-
-    label = 'Define color swapping in cards'
+    window = None
+    label = 'Customise colors on cards'
 
     def action(self):
-        # TODO - show a custom window allowing user to set mappings,
-        # replace self.value with updated mappings
-        alert('TODO')
+        from aqt import mw as main_window
+        if not self.window:
+            # self.value is mutable, any modifications done by ColorMapWindow
+            # will be done on the value of this singleton class object
+            self.window = ColorMapWindow(
+                main_window,
+                self.value,
+                on_update=self.on_colors_changed
+            )
+        self.window.show()
+
+    def on_colors_changed(self):
+        self.app.refresh()
 
 
 class InvertImage(Setting, MenuAction):
@@ -147,7 +157,7 @@ class ActiveBackgroundColor(ColorAction):
 
 class ResetColors(MenuAction):
     """Reset colors"""
-    label = '&Reset colors'
+    label = '&Reset background and text colors'
 
     def action(self):
         self.app.config.color_b.reset()

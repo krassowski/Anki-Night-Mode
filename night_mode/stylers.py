@@ -1,21 +1,15 @@
-from PyQt5 import QtCore
-
 import aqt
 from aqt import mw, editor
 from aqt.addcards import AddCards
 from aqt.browser import Browser
 from aqt.editcurrent import EditCurrent
 from aqt.editor import Editor
+
+from .color_map import ColorMapWindow
 from .config import ConfigValueGetter
-from .internals import percent_escaped, move_args_to_kwargs
+from .internals import percent_escaped, move_args_to_kwargs, from_utf8
 from .internals import style_tag, wraps, appends_in_night_mode, replaces_in_night_mode, css
 from .styles import SharedStyles, ButtonsStyle, ImageStyle, DeckStyle, LatexStyle, DialogStyle
-
-try:
-    from_utf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    from_utf8 = lambda s: s
-
 from .internals import SnakeNameMixin, StylerMetaclass, abstract_property
 from .styles import StyleRequiringMixin
 
@@ -589,3 +583,23 @@ class EditorWebViewStyler(Styler):
 
             return custom_css
         return ''
+
+
+class ColorMapStyler(Styler):
+
+    target = ColorMapWindow
+    require = {
+        SharedStyles,
+        ButtonsStyle
+    }
+
+    @wraps
+    def init(self, window, *args, **kwargs):
+        if self.config.state_on and self.config.enable_in_dialogs:
+            self.style(window)
+
+    def style(self, window):
+        window.setStyleSheet(
+            self.buttons.qt +
+            'QDialog, QLabel{' + self.shared.colors + '}'
+        )

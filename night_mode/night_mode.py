@@ -36,6 +36,7 @@ from aqt import mw
 
 from PyQt5.QtWidgets import QMessageBox
 
+from .internals import alert
 from .actions_and_settings import *
 from .config import Config
 from .icons import Icons
@@ -91,6 +92,7 @@ class NightMode:
         BackgroundColor,
         TextColor,
         ResetColors,
+        UserColorMap,
         '-',
         About
     ]
