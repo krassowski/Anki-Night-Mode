@@ -110,6 +110,11 @@ class MenuAction(SnakeNameMixin, metaclass=AbstractRegisteringType):
         """Callback for menu entry clicking/selection"""
         pass
 
+    @property
+    def is_checked(self):
+        """Should the menu item be checked (assuming that checkable is True)"""
+        return bool(self.value)
+
 
 def singleton_creator(old_creator):
     def one_to_rule_them_all(cls, *args, **kwargs):
@@ -130,9 +135,26 @@ class SingletonMetaclass(AbstractRegisteringType):
         cls.__new__ = singleton_creator(old_creator)
 
 
-class Setting(SnakeNameMixin, metaclass=SingletonMetaclass):
+class RequiringMixin:
+
+    require = set()
+    dependencies = {}
 
     def __init__(self, app):
+        for requirement in self.require:
+            instance = requirement(app)
+            key = instance.name
+            self.dependencies[key] = instance
+
+    def __getattr__(self, attr):
+        if attr in self.dependencies:
+            return self.dependencies[attr]
+
+
+class Setting(RequiringMixin, SnakeNameMixin, metaclass=SingletonMetaclass):
+
+    def __init__(self, app):
+        RequiringMixin.__init__(self, app)
         self.default_value = self.value
         self.app = app
 
@@ -143,6 +165,9 @@ class Setting(SnakeNameMixin, metaclass=SingletonMetaclass):
 
     def on_load(self):
         """Callback called after loading of initial value"""
+        pass
+
+    def on_save(self):
         pass
 
     def reset(self):

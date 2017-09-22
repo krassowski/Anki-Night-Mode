@@ -1,30 +1,15 @@
 from .config import ConfigValueGetter
-from .internals import css, snake_case, SingletonMetaclass
+from .internals import css, snake_case, SingletonMetaclass, RequiringMixin
 
 
-class StyleRequiringMixin:
+class Style(RequiringMixin, metaclass=SingletonMetaclass):
 
-    require = set()
-    styles = {}
-
-    def __init__(self, app):
-        for requirement in self.require:
-            key = requirement.name()
-            self.styles[key] = requirement(app)
-
-    def __getattr__(self, attr):
-        if attr in self.styles:
-            return self.styles[attr]
-
-
-class Style(StyleRequiringMixin, metaclass=SingletonMetaclass):
-
-    @classmethod
-    def name(cls):
-        return snake_case(cls.__name__).split('_')[0]
+    @property
+    def name(self):
+        return snake_case(self.__class__.__name__).split('_')[0]
 
     def __init__(self, app):
-        StyleRequiringMixin.__init__(self, app)
+        RequiringMixin.__init__(self, app)
         self.app = app
         self.config = ConfigValueGetter(app.config)
 
@@ -168,6 +153,11 @@ class ButtonsStyle(Style):
             background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #4C5A64, stop: 0.04 #404F5A, stop: 1 #2E3940);
         }
         """ + restrict_to_parent + """ QPushButton""" + restrict_to + """:pressed
+        {
+            """ + self.active + """
+            background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #20282D, stop: 0.51 #252E34, stop: 1 #222A30);
+        }
+        """ + restrict_to_parent + """ QPushButton""" + restrict_to + """:disabled
         {
             """ + self.active + """
             background: qlineargradient(x1: 0.0, y1: 0.0, x2: 0.0, y2: 1.0, radius: 1, stop: 0.03 #20282D, stop: 0.51 #252E34, stop: 1 #222A30);

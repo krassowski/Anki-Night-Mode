@@ -4,20 +4,20 @@ from aqt.addcards import AddCards
 from aqt.browser import Browser
 from aqt.editcurrent import EditCurrent
 from aqt.editor import Editor
+from .gui import AddonDialog
 
-from .color_map import ColorMapWindow
 from .config import ConfigValueGetter
 from .internals import percent_escaped, move_args_to_kwargs, from_utf8
 from .internals import style_tag, wraps, appends_in_night_mode, replaces_in_night_mode, css
 from .styles import SharedStyles, ButtonsStyle, ImageStyle, DeckStyle, LatexStyle, DialogStyle
 from .internals import SnakeNameMixin, StylerMetaclass, abstract_property
-from .styles import StyleRequiringMixin
+from .internals import RequiringMixin
 
 
-class Styler(StyleRequiringMixin, SnakeNameMixin, metaclass=StylerMetaclass):
+class Styler(RequiringMixin, SnakeNameMixin, metaclass=StylerMetaclass):
 
     def __init__(self, app):
-        StyleRequiringMixin.__init__(self, app)
+        RequiringMixin.__init__(self, app)
         self.app = app
         self.config = ConfigValueGetter(app.config)
         self.replacements = {}
@@ -585,9 +585,9 @@ class EditorWebViewStyler(Styler):
         return ''
 
 
-class ColorMapStyler(Styler):
+class AddonDialogStyler(Styler):
 
-    target = ColorMapWindow
+    target = AddonDialog
     require = {
         SharedStyles,
         ButtonsStyle
@@ -601,5 +601,5 @@ class ColorMapStyler(Styler):
     def style(self, window):
         window.setStyleSheet(
             self.buttons.qt +
-            'QDialog, QLabel{' + self.shared.colors + '}'
+            'QDialog, QLabel, QTimeEdit{' + self.shared.colors + '}'
         )

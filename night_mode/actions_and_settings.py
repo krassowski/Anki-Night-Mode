@@ -1,8 +1,12 @@
+from datetime import datetime
+
+from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QColorDialog
 
-from .internals import Setting, MenuAction
+from .internals import Setting, MenuAction, alert
 from .color_map import ColorMapWindow
+from .mode import ModeWindow
 
 
 class UserColorMap(Setting, MenuAction):
@@ -183,20 +187,130 @@ class EnableInDialogs(Setting, MenuAction):
         self.value = not self.value
 
 
+class ModeSettings(Setting, MenuAction):
+    value = {
+        'mode': 'manual',
+        'start_at': '21:30',
+        'end_at': '07:30'
+    }
+    window = None
+    label = 'Start automatically'
+    checkable = True
+
+    @property
+    def is_checked(self):
+        return self.mode == 'auto'
+
+    @property
+    def mode(self):
+        return self.value['mode']
+
+    def action(self):
+        from aqt import mw as main_window
+
+        if not self.window:
+            # self.value is mutable, any modifications done by ColorMapWindow
+            # will be done on the value of this singleton class object
+            self.window = ModeWindow(
+                main_window,
+                self.value,
+                on_update=self.update
+            )
+        self.window.show()
+        self.app.update_menu()
+
+    def update(self):
+        self.app.refresh()
+
+    @property
+    def is_active(self):
+        current_time = datetime.now().time()
+        return self.time('start_at') <= current_time <= self.time('end_at')
+
+    def time(self, which):
+        return datetime.strptime(self.value[which], '%H:%M').time()
+
+
 class EnableNightMode(Setting, MenuAction):
     """Switch night mode"""
     value = False
-    name = 'state_on'
     label = '&Enable night mode'
     shortcut = 'Ctrl+n'
     checkable = True
 
+    require = {
+        ModeSettings,
+        # 'StateSettings' (circular dependency)
+    }
+
     def action(self):
         self.value = not self.value
+
+        if self.mode_settings.mode != 'manual':
+            alert(
+                'Automatic Night Mode has been disabled. '
+                '(You pressed "ctrl+n" or switched a toggle in the menu). '
+                'Now you can toggle Night Mode manually '
+                'or re-enable the Automatic Night Mode in the menu. '
+            )
+            self.mode_settings.value['mode'] = 'manual'
+
         success = self.app.refresh()
+
         if not success:
             self.value = not self.value
+
+        self.app.config.state_on.update_state()
+
+
+class StateSetting(Setting):
+    """Stores the last state of application.
+
+    The state after start-up is determined programmatically;
+    the value set during configuration loading will be ignored.
+    """
+    name = 'state_on'
+    state = None
+
+    require = {
+        ModeSettings,
+        EnableNightMode
+    }
+
+    @property
+    def value(self):
+        if self.mode_settings.mode == 'manual':
+            return self.enable_night_mode.value
+        else:
+            return self.mode_settings.is_active
+
+    @value.setter
+    def value(self, value):
+        pass
+
+    def __init__(self, *args , **kwargs):
+        super().__init__(*args, **kwargs)
+        # check the state every 60 seconds
+        # (maybe a bit suboptimal, but the most reliable)
+        from aqt import mw as main_window
+        self.timer = QTimer(main_window)
+        self.timer.setInterval(60 * 100)  # 1000 milliseconds
+        self.timer.timeout.connect(self.maybe_enable_maybe_disable)
 
     def on_load(self):
         if self.value:
             self.app.on()
+
+        self.update_state()
+        self.timer.start()
+
+    def on_save(self):
+        self.timer.stop()
+
+    def maybe_enable_maybe_disable(self):
+        if self.value != self.state:
+            self.app.refresh()
+            self.update_state()
+
+    def update_state(self):
+        self.state = self.value

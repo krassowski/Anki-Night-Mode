@@ -94,4 +94,4 @@ class Menu:
     def update_checkboxes(self, settings):
         for name, setting in settings.items():
             if name in self.actions and self.raw_actions[name].checkable:
-                self.set_checked(name, setting.value)
+                self.set_checked(name, setting.is_checked)

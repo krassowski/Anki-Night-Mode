@@ -36,8 +36,8 @@ from aqt import mw
 
 from PyQt5.QtWidgets import QMessageBox
 
-from .internals import alert
 from .actions_and_settings import *
+from .internals import alert
 from .config import Config
 from .icons import Icons
 from .menu import get_or_create_menu, Menu
@@ -92,6 +92,8 @@ class NightMode:
         BackgroundColor,
         TextColor,
         ResetColors,
+        '-',
+        ModeSettings,
         UserColorMap,
         '-',
         About
@@ -126,6 +128,9 @@ class NightMode:
         self.profile_loaded = True
 
         self.refresh()
+        self.update_menu()
+
+    def update_menu(self):
         self.menu.update_checkboxes(self.config.settings)
 
     def save(self):
@@ -170,7 +175,7 @@ class NightMode:
 
         # Redraw toolbar (should be always visible).
         mw.toolbar.draw()
-        self.menu.set_checked('state_on', state)
+        self.update_menu()
         return True
 
     def about(self):
@@ -193,7 +198,7 @@ class NightMode:
         if not web_object:
             web_object = mw.reviewer.web
 
-        if self.config.state_on.value:
+        if self.config.state_on:
             javascript = """
             current_classes = document.body.className;
             if(current_classes.indexOf("night_mode") == -1)

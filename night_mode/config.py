@@ -27,6 +27,8 @@ class Config:
             value = mw.pm.profile.get(key, setting.default_value)
 
             setting.value = value
+
+        for setting in self.settings.values():
             setting.on_load()
 
     def save(self):
@@ -38,6 +40,9 @@ class Config:
             key = self.stored_name(name)
             mw.pm.profile[key] = setting.value
 
+        for setting in self.settings.values():
+            setting.on_save()
+
 
 class ConfigValueGetter:
 
@@ -45,4 +50,5 @@ class ConfigValueGetter:
         self.config = config
 
     def __getattr__(self, attr):
-        return getattr(self.config, attr).value
+        setting = getattr(self.config, attr)
+        return setting.value

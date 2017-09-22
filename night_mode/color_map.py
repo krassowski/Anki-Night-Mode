@@ -2,7 +2,8 @@ from PyQt5.QtCore import Qt, pyqtSlot as slot
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QDialog, QPushButton, QColorDialog, QHBoxLayout, QVBoxLayout
 
-from night_mode.internals import alert
+from .internals import alert
+from .gui import create_button, remove_layout, AddonDialog
 
 
 class ColorSwatch(QPushButton):
@@ -66,19 +67,6 @@ class ColorSwatch(QPushButton):
             self.callback(old_color, self.color)
 
 
-def create_button(name, callback):
-    button = QPushButton(name)
-    button.clicked.connect(callback)
-    return button
-
-
-def remove_layout(layout):
-    for i in reversed(range(layout.count())):
-        widget = layout.itemAt(i).widget()
-        layout.removeWidget(widget)
-        widget.deleteLater()
-
-
 class ColorMapping(QWidget):
 
     def __init__(self, parent, normal_color, night_color):
@@ -126,10 +114,10 @@ class ColorMapping(QWidget):
         return self.parent.is_acceptable(color)
 
 
-class ColorMapWindow(QDialog):
+class ColorMapWindow(AddonDialog):
 
     def __init__(self, parent, color_map, title='Customise colors swapping', on_update=None):
-        QDialog.__init__(self, parent, Qt.Window)
+        super().__init__(self, parent, Qt.Window)
         self.on_update = on_update
         self.color_map = color_map
 
