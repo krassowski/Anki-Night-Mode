@@ -225,7 +225,12 @@ class ModeSettings(Setting, MenuAction):
     @property
     def is_active(self):
         current_time = datetime.now().time()
-        return self.time('start_at') <= current_time <= self.time('end_at')
+        start = self.time('start_at')
+        end = self.time('end_at')
+        if end > start:
+            return start <= current_time <= end
+        else:
+            return start <= current_time or current_time <= end
 
     def time(self, which):
         return datetime.strptime(self.value[which], '%H:%M').time()
