@@ -1,10 +1,13 @@
+from PyQt5.QtCore import Qt
+
 import aqt
 from aqt import mw, editor
 from aqt.addcards import AddCards
 from aqt.browser import Browser
 from aqt.editcurrent import EditCurrent
 from aqt.editor import Editor
-from .gui import AddonDialog
+from aqt.progress import ProgressManager
+from .gui import AddonDialog, iterate_widgets
 
 from .config import ConfigValueGetter
 from .internals import percent_escaped, move_args_to_kwargs, from_utf8
@@ -20,7 +23,6 @@ class Styler(RequiringMixin, SnakeNameMixin, metaclass=StylerMetaclass):
         RequiringMixin.__init__(self, app)
         self.app = app
         self.config = ConfigValueGetter(app.config)
-        self.replacements = {}
         self.original_attributes = {}
 
     @abstract_property
@@ -44,7 +46,7 @@ class Styler(RequiringMixin, SnakeNameMixin, metaclass=StylerMetaclass):
 
             for key, replacement in self.replacements.items():
                 self.get_or_create_original(key)
-                setattr(self.target, key, replacement)
+                setattr(self.target, key, replacement.value(self))
         except (AttributeError, TypeError):
             print('Failed to inject style to:', self.target, key, self.name)
             raise
@@ -462,8 +464,8 @@ class AddCardsStyler(Styler):
 
     @staticmethod
     def set_style_to_objects_inside(layout, style):
-        for i in range(layout .count()):
-            layout.itemAt(i).widget().setStyleSheet(style)
+        for widget in iterate_widgets(layout):
+            widget.setStyleSheet(style)
 
 
 class EditCurrentStyler(Styler):
@@ -478,6 +480,52 @@ class EditCurrentStyler(Styler):
         if self.config.state_on and self.config.enable_in_dialogs:
             # style close button
             edit_current.form.buttonBox.setStyleSheet(self.buttons.qt)
+
+
+class ProgressStyler(Styler):
+
+    target = None
+    require = {
+        SharedStyles,
+        DialogStyle,
+        ButtonsStyle
+    }
+
+    def init(self, progress, label='', *args, **kwargs):
+        if self.config.state_on and self.config.enable_in_dialogs:
+            # Set label and its styles explicitly (otherwise styling does not work)
+            label = aqt.QLabel(label)
+            progress.setLabel(label)
+            label.setAlignment(Qt.AlignCenter)
+            label.setStyleSheet(self.dialog.style)
+
+            progress.setStyleSheet(self.buttons.qt + self.dialog.style)
+
+
+class ProgressNoCancel(Styler):
+
+    target = ProgressManager.ProgressNoCancel
+    require = {ProgressStyler}
+
+    # so this bit is required to enable init wrapping of Qt objects
+    def init(cls, label='', *args, **kwargs):
+        aqt.QProgressDialog.__init__(cls, label, *args, **kwargs)
+
+    target.__init__ = init
+
+    @wraps
+    def init(self, progress, *args, **kwargs):
+        self.progress_styler.init(progress, *args, **kwargs)
+
+
+class ProgressCancelable(Styler):
+
+    target = ProgressManager.ProgressCancellable
+    require = {ProgressStyler}
+
+    @wraps
+    def init(self, progress, *args, **kwargs):
+        self.progress_styler.init(progress, *args, **kwargs)
 
 
 class EditorStyler(Styler):

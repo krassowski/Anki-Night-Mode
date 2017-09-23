@@ -30,14 +30,6 @@ class PropertyDescriptor:
         self.value = value
 
 
-class BoundMethod:
-    def __init__(self, func):
-        self.function = func
-
-    def __get__(self, obj, obj_type=None):
-        return self.function.__get__(obj, obj_type)
-
-
 class css(PropertyDescriptor):
     is_css = True
 
@@ -227,13 +219,13 @@ class StylerMetaclass(AbstractRegisteringType):
             return raw_new
 
         for key, attr in attributes.items():
+
+            if key == 'init':
+                key = '__init__'
             if hasattr(attr, 'wraps'):
 
                 if not target:
                     raise Exception('Asked to wrap "{0}" but target of {1} not defined'.format(key, name))
-
-                if key == 'init':
-                    key = '__init__'
 
                 original = getattr(target, key)
 
