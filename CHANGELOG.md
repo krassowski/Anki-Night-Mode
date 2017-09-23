@@ -1,5 +1,12 @@
+### 2.1.2
+*September 23, 2017*
+ - Use night mode colors for synchronization/backup progress pop-up dialogs.
+ - Minor fix: make selected rows in card browser use night mode colors again.
+ 
+Please note that the new options are only available in addon when running Anki 2.1.x
+
 ### 2.1
-*September 19, 2017*
+*September 22, 2017*
  - new option: "Automatic mode" (suggested by p2635: #22) - allows to set times at which the nigh mode should be automatically turned on and off.
  - new option: "Customise colors on cards" - defining custom color mappings just got easier with a new dedicated dialog window - no need to modify source files anymore!
  
