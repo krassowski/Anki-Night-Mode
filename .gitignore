@@ -1,3 +1,6 @@
+anki_root
+anki_testing
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

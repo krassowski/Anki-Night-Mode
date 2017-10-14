@@ -1,0 +1,12 @@
+language: python
+
+python:
+  - 3.6
+
+install:
+  - git clone https://github.com/krassowski/anki_testing
+  - source anki_testing/setup.sh
+
+script:
+  - bash run_tests.sh
+
