@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-bash anki_testing/install_anki.sh
+source anki_testing/install_anki.sh
+pip freeze
 python3.6 -m pytest tests
-
