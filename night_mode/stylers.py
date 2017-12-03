@@ -369,10 +369,12 @@ class BrowserStyler(Styler):
         }
         QTreeView::item:selected:active, QTreeView::branch:selected:active
         {
+            color: """ + self.config.color_t + """;
             background:""" + self.config.color_a + """
         }
         QTreeView::item:selected:!active, QTreeView::branch:selected:!active
         {
+            color: """ + self.config.color_t + """;
             background:""" + self.config.color_a + """
         }
         """
@@ -382,6 +384,7 @@ class BrowserStyler(Styler):
         return f"""
             QTableView
             {{
+                color: {self.config.color_t};
                 alternate-background-color: {self.config.color_s};
                 gridline-color: {self.config.color_s};
                 {self.shared.colors}
