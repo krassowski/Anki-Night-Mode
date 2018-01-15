@@ -485,7 +485,7 @@ class EditCurrentStyler(Styler):
             edit_current.form.buttonBox.setStyleSheet(self.buttons.qt)
 
 
-class ProgressStyler(Styler):
+class LegacyProgressStyler(Styler):
 
     target = None
     require = {
@@ -505,30 +505,59 @@ class ProgressStyler(Styler):
             progress.setStyleSheet(self.buttons.qt + self.dialog.style)
 
 
-class ProgressNoCancel(Styler):
+class ProgressStyler(Styler):
 
-    target = ProgressManager.ProgressNoCancel
-    require = {ProgressStyler}
+    target = None
+    require = {
+        SharedStyles,
+        DialogStyle,
+        ButtonsStyle
+    }
 
-    # so this bit is required to enable init wrapping of Qt objects
-    def init(cls, label='', *args, **kwargs):
-        aqt.QProgressDialog.__init__(cls, label, *args, **kwargs)
-
-    target.__init__ = init
-
-    @wraps
     def init(self, progress, *args, **kwargs):
-        self.progress_styler.init(progress, *args, **kwargs)
+        if self.config.state_on and self.config.enable_in_dialogs:
+            progress.setStyleSheet(self.buttons.qt + self.dialog.style)
 
 
-class ProgressCancelable(Styler):
+if hasattr(ProgressManager, 'ProgressNoCancel'):
+    # before beta 31
 
-    target = ProgressManager.ProgressCancellable
-    require = {ProgressStyler}
+    class ProgressNoCancel(Styler):
 
-    @wraps
-    def init(self, progress, *args, **kwargs):
-        self.progress_styler.init(progress, *args, **kwargs)
+        target = ProgressManager.ProgressNoCancel
+        require = {LegacyProgressStyler}
+
+        # so this bit is required to enable init wrapping of Qt objects
+        def init(cls, label='', *args, **kwargs):
+            aqt.QProgressDialog.__init__(cls, label, *args, **kwargs)
+
+        target.__init__ = init
+
+        @wraps
+        def init(self, progress, *args, **kwargs):
+            self.progress_styler.init(progress, *args, **kwargs)
+
+
+    class ProgressCancelable(Styler):
+
+        target = ProgressManager.ProgressCancellable
+        require = {LegacyProgressStyler}
+
+        @wraps
+        def init(self, progress, *args, **kwargs):
+            self.progress_styler.init(progress, *args, **kwargs)
+
+else:
+    # beta 31 or newer
+
+    class ProgressDialog(Styler):
+
+        target = ProgressManager.ProgressDialog
+        require = {ProgressStyler}
+
+        @wraps
+        def init(self, progress, *args, **kwargs):
+            self.progress_styler.init(progress, *args, **kwargs)
 
 
 class EditorStyler(Styler):
