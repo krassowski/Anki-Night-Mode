@@ -1,3 +1,12 @@
+### 2.1.4
+*January 20, 2017*
+ - Add styling to "Statistics" window (when "enable in dialogs" is on) #9
+
+### 2.1.3
+*January 15, 2017*
+ - Add compatibility with 2.1 beta 31 (which changed progress dialogs interface)
+
+
 ### 2.1.2
 *September 23, 2017*
  - Use night mode colors for synchronization/backup progress pop-up dialogs.
@@ -14,7 +23,7 @@ Please note that the new options are only available in addon when running Anki 2
  
 ### 2.0
 *September 19, 2017*
- - new, rewritten addon, compatibile with Anki 2.1.x Beta 13+.
+ - new, rewritten addon, compatible with Anki 2.1.x Beta 13+.
  
 ### 1.2.3
 *September 6, 2017*

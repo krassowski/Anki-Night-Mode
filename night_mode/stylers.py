@@ -1,12 +1,14 @@
 from PyQt5.QtCore import Qt
 
 import aqt
+from anki.stats import CollectionStats
 from aqt import mw, editor
 from aqt.addcards import AddCards
 from aqt.browser import Browser
 from aqt.editcurrent import EditCurrent
 from aqt.editor import Editor
 from aqt.progress import ProgressManager
+from aqt.stats import DeckStats
 from .gui import AddonDialog, iterate_widgets
 
 from .config import ConfigValueGetter
@@ -558,6 +560,41 @@ else:
         @wraps
         def init(self, progress, *args, **kwargs):
             self.progress_styler.init(progress, *args, **kwargs)
+
+
+class StatsStyler(Styler):
+
+    target = DeckStats
+
+    require = {
+        DialogStyle,
+        ButtonsStyle
+    }
+
+    @wraps
+    def init(self, stats, *args, **kwargs):
+        if self.config.state_on and self.config.enable_in_dialogs:
+            stats.setStyleSheet(self.buttons.qt + self.dialog.style)
+
+
+class CollectionStatsStyler(Styler):
+
+    target = CollectionStats
+
+    require = {
+        SharedStyles,
+        DialogStyle
+    }
+
+    @appends_in_night_mode
+    @style_tag
+    @percent_escaped
+    def css(self):
+        return (
+            self.shared.user_color_map + self.shared.body_colors + """
+            body{background-image: none}
+            """
+        )
 
 
 class EditorStyler(Styler):
