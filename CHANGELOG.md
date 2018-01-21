@@ -1,3 +1,7 @@
+### 2.1.5
+*January 21, 2017*
+ - Allow to selectively disable parts of the add-on #26, #25
+
 ### 2.1.4
 *January 20, 2017*
  - Add styling to "Statistics" window (when "enable in dialogs" is on) #9
