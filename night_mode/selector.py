@@ -43,7 +43,9 @@ class StylersSelectorWindow(AddonDialog):
 
         header = QLabel(
             'Select which parts of Anki should be displayed '
-            'in eye-friendly, dark colors.'
+            'in eye-friendly, dark colors.\n\n'
+            'To disable all dialog windows, '
+            'use the "Enable in dialogs" switch which is available in menu.'
         )
         header.setAlignment(Qt.AlignCenter)
 

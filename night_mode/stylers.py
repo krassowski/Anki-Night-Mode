@@ -120,10 +120,7 @@ class ReviewerStyler(Styler):
 
     @wraps(position='around')
     def _bottomHTML(self, reviewer, _old):
-        if self.config.state_on:
-            return _old(reviewer) + style_tag(percent_escaped(self.bottom_css))
-        else:
-            return _old(reviewer)
+        return _old(reviewer) + style_tag(percent_escaped(self.bottom_css))
 
     @property
     def bottom_css(self):
@@ -147,10 +144,7 @@ class ReviewerStyler(Styler):
     # TODO: it can be implemented with a nice decorator
     @wraps(position='around')
     def revHtml(self, reviewer, _old):
-        if self.config.state_on:
-            return _old(reviewer) + style_tag(percent_escaped(self.body))
-        else:
-            return _old(reviewer)
+        return _old(reviewer) + style_tag(percent_escaped(self.body))
 
     @css
     def body(self):
@@ -300,8 +294,7 @@ class AnkiWebViewStyler(Styler):
 
         args, kwargs = move_args_to_kwargs(old, [web] + list(args), kwargs)
 
-        if self.config.state_on:
-            kwargs['head'] = kwargs.get('head', '') + style_tag(self.waiting_screen)
+        kwargs['head'] = kwargs.get('head', '') + style_tag(self.waiting_screen)
 
         return old(web, *args[1:], **kwargs)
 
@@ -334,7 +327,7 @@ class BrowserStyler(Styler):
     @wraps
     def init(self, browser, mw):
 
-        if self.config.state_on and self.config.enable_in_dialogs:
+        if self.config.enable_in_dialogs:
 
             basic_css = browser.styleSheet()
             global_style = '#' + browser.form.centralwidget.objectName() + '{' + self.shared.colors + '}'
@@ -358,7 +351,7 @@ class BrowserStyler(Styler):
 
         rep, cs = _old(browser)
 
-        if self.config.state_on and self.config.enable_in_dialogs:
+        if self.config.enable_in_dialogs:
             rep += style_tag("""
                 *
                 {
@@ -469,7 +462,7 @@ class AddCardsStyler(Styler):
 
     @wraps
     def init(self, add_cards, mw):
-        if self.config.state_on and self.config.enable_in_dialogs:
+        if self.config.enable_in_dialogs:
 
             # style add/history button
             add_cards.form.buttonBox.setStyleSheet(self.buttons.qt)
@@ -496,29 +489,9 @@ class EditCurrentStyler(Styler):
 
     @wraps
     def init(self, edit_current, mw):
-        if self.config.state_on and self.config.enable_in_dialogs:
+        if self.config.enable_in_dialogs:
             # style close button
             edit_current.form.buttonBox.setStyleSheet(self.buttons.qt)
-
-
-class LegacyProgressStyler(Styler):
-
-    target = None
-    require = {
-        SharedStyles,
-        DialogStyle,
-        ButtonsStyle
-    }
-
-    def init(self, progress, label='', *args, **kwargs):
-        if self.config.state_on and self.config.enable_in_dialogs:
-            # Set label and its styles explicitly (otherwise styling does not work)
-            label = aqt.QLabel(label)
-            progress.setLabel(label)
-            label.setAlignment(Qt.AlignCenter)
-            label.setStyleSheet(self.dialog.style)
-
-            progress.setStyleSheet(self.buttons.qt + self.dialog.style)
 
 
 class ProgressStyler(Styler):
@@ -531,12 +504,30 @@ class ProgressStyler(Styler):
     }
 
     def init(self, progress, *args, **kwargs):
-        if self.config.state_on and self.config.enable_in_dialogs:
+        if self.config.enable_in_dialogs:
             progress.setStyleSheet(self.buttons.qt + self.dialog.style)
 
 
 if hasattr(ProgressManager, 'ProgressNoCancel'):
     # before beta 31
+    class LegacyProgressStyler(Styler):
+
+        target = None
+        require = {
+            SharedStyles,
+            DialogStyle,
+            ButtonsStyle
+        }
+
+        def init(self, progress, label='', *args, **kwargs):
+            if self.config.enable_in_dialogs:
+                # Set label and its styles explicitly (otherwise styling does not work)
+                label = aqt.QLabel(label)
+                progress.setLabel(label)
+                label.setAlignment(Qt.AlignCenter)
+                label.setStyleSheet(self.dialog.style)
+
+                progress.setStyleSheet(self.buttons.qt + self.dialog.style)
 
     class ProgressNoCancel(Styler):
 
@@ -576,7 +567,7 @@ else:
             self.progress_styler.init(progress, *args, **kwargs)
 
 
-class StatsStyler(Styler):
+class StatsWindowStyler(Styler):
 
     target = DeckStats
 
@@ -587,11 +578,11 @@ class StatsStyler(Styler):
 
     @wraps
     def init(self, stats, *args, **kwargs):
-        if self.config.state_on and self.config.enable_in_dialogs:
+        if self.config.enable_in_dialogs:
             stats.setStyleSheet(self.buttons.qt + self.dialog.style)
 
 
-class CollectionStatsStyler(Styler):
+class StatsReportStyler(Styler):
 
     target = CollectionStats
 
@@ -630,7 +621,7 @@ class EditorStyler(Styler):
     @wraps
     def init(self, editor, mw, widget, parentWindow, addMode=False):
 
-        if self.config.state_on and self.config.enable_in_dialogs:
+        if self.config.enable_in_dialogs:
 
             editor_css = self.dialog.style + self.buttons.qt
 
@@ -726,7 +717,7 @@ class AddonDialogStyler(Styler):
 
     @wraps
     def init(self, window, *args, **kwargs):
-        if self.config.state_on and self.config.enable_in_dialogs:
+        if self.config.enable_in_dialogs:
             self.style(window)
 
     def style(self, window):
