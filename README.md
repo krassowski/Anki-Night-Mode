@@ -9,11 +9,11 @@ This plugin adds the function of night mode, similar that one implemented in Ank
 ### How it works?
 
 It adds a "view" menu entity with options like:
-- switching night mode
-- inverting colors of images or latex formulas
-- modifying some of the colors
+- Automatic (i.e. at specified time) or manual switching of the night mode
+- Inverting colors of images or latex formulas
+- Defining custom color substitution rules
 
-It provides shortcut `ctrl+n` to quickly switch mode and color picker to adjust some of color parameters.
+It provides shortcut <kbd>ctrl</kbd>+<kbd>n</kbd> to quickly switch mode and color picker to adjust some of color parameters.
 
 After enabling night mode, addon changes colors of menubar, toolbar, bottombars and content windows. Take a look at screenshot at the bottom of this page to see an example.
 
@@ -30,7 +30,7 @@ From menu select: `Tools >> Add-ons >> Browse && Install...` and into prompt put
 
 after clicking `ok` addon will be downloaded. Then you shall restart your Anki.
 
-To switch into night mode you can use `ctrl+n` shortcut or make use of some new options in your menu: `View >> Night Mode >> ...`.
+To switch into night mode you can use <kbd>ctrl</kbd>+<kbd>n</kbd> shortcut or make use of some new options in your menu: `View >> Night Mode >> ...`.
 
 #### Manual installation
 
