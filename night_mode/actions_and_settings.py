@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QColorDialog
 from .internals import Setting, MenuAction, alert
 from .color_map import ColorMapWindow
 from .mode import ModeWindow
+from .selector import StylersSelectorWindow
 
 
 class UserColorMap(Setting, MenuAction):
@@ -293,7 +294,7 @@ class StateSetting(Setting):
     def value(self, value):
         pass
 
-    def __init__(self, *args , **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # check the state every 60 seconds
         # (maybe a bit suboptimal, but the most reliable)
@@ -319,3 +320,25 @@ class StateSetting(Setting):
 
     def update_state(self):
         self.state = self.value
+
+
+class DisabledStylers(Setting, MenuAction):
+
+    value = set()
+    window = None
+    label = 'Choose what to style'
+
+    def action(self):
+        from aqt import mw as main_window
+
+        if not self.window:
+            self.window = StylersSelectorWindow(
+                main_window,
+                self.value,
+                self.app.styles.stylers,
+                on_update=self.update
+            )
+        self.window.show()
+
+    def update(self):
+        self.app.refresh(reload=True)

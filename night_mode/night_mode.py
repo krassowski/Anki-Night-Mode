@@ -38,14 +38,14 @@ from PyQt5.QtWidgets import QMessageBox
 
 from .actions_and_settings import *
 from .internals import alert
-from .config import Config
+from .config import Config, ConfigValueGetter
 from .icons import Icons
 from .menu import get_or_create_menu, Menu
 from .stylers import Styler
 from .styles import Style, MessageBoxStyle
 
 __addon_name__ = 'Night Mode'
-__version__ = '2.1.4'
+__version__ = '2.1.5'
 __anki_version__ = '2.1'
 
 
@@ -69,9 +69,19 @@ class StylingManager:
             styler(app)
             for styler in Styler.members
         ]
+        self.config = ConfigValueGetter(app.config)
+
+    @property
+    def active_stylers(self):
+        return [
+            styler
+            for styler in self.stylers
+            if styler.name not in self.config.disabled_stylers
+        ]
 
     def replace(self):
-        for styler in self.stylers:
+        print(self.active_stylers)
+        for styler in self.active_stylers:
             styler.replace_attributes()
 
     def restore(self):
@@ -95,6 +105,7 @@ class NightMode:
         '-',
         ModeSettings,
         UserColorMap,
+        DisabledStylers,
         '-',
         About
     ]
@@ -144,7 +155,7 @@ class NightMode:
         """Turn off night mode."""
         self.styles.restore()
 
-    def refresh(self):
+    def refresh(self, reload=False):
         """
         Refresh display by re-enabling night or normal mode,
         regenerate customizable css strings.
@@ -157,6 +168,8 @@ class NightMode:
 
         try:
             if state:
+                if reload:
+                    self.off()
                 self.on()
             else:
                 self.off()

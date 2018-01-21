@@ -31,6 +31,15 @@ class Styler(RequiringMixin, SnakeNameMixin, metaclass=StylerMetaclass):
     def target(self):
         return None
 
+    @property
+    def is_active(self):
+        return self.name not in self.config.disabled_stylers
+
+    @property
+    def friendly_name(self):
+        name = self.name.replace('_styler', '')
+        return name.replace('_', ' ').title()
+
     def get_or_create_original(self, key):
         if key not in self.original_attributes:
             original = getattr(self.target, key)
@@ -537,7 +546,7 @@ if hasattr(ProgressManager, 'ProgressNoCancel'):
 
         @wraps
         def init(self, progress, *args, **kwargs):
-            self.progress_styler.init(progress, *args, **kwargs)
+            self.legacy_progress_styler.init(progress, *args, **kwargs)
 
 
     class ProgressCancelable(Styler):
@@ -547,7 +556,7 @@ if hasattr(ProgressManager, 'ProgressNoCancel'):
 
         @wraps
         def init(self, progress, *args, **kwargs):
-            self.progress_styler.init(progress, *args, **kwargs)
+            self.legacy_progress_styler.init(progress, *args, **kwargs)
 
 else:
     # beta 31 or newer
@@ -718,5 +727,5 @@ class AddonDialogStyler(Styler):
     def style(self, window):
         window.setStyleSheet(
             self.buttons.qt +
-            'QDialog, QLabel, QTimeEdit{' + self.shared.colors + '}'
+            'QDialog, QCheckBox, QLabel, QTimeEdit{' + self.shared.colors + '}'
         )

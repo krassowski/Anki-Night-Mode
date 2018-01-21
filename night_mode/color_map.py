@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, pyqtSlot as slot
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QDialog, QPushButton, QColorDialog, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton, QColorDialog, QHBoxLayout, QVBoxLayout
 
 from .internals import alert
 from .gui import create_button, remove_layout, AddonDialog

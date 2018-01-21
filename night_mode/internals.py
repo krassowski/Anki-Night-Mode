@@ -225,7 +225,7 @@ class StylerMetaclass(AbstractRegisteringType):
             if hasattr(attr, 'wraps'):
 
                 if not target:
-                    raise Exception('Asked to wrap "{0}" but target of {1} not defined'.format(key, name))
+                    raise Exception(f'Asked to wrap "{key}" but target of {name} not defined')
 
                 original = getattr(target, key)
 
@@ -244,11 +244,11 @@ class StylerMetaclass(AbstractRegisteringType):
 
             if hasattr(attr, 'appends_in_night_mode'):
                 if not target:
-                    raise Exception('Asked to replace "{0}" but target of {1} not defined'.format(key, name))
+                    raise Exception(f'Asked to replace "{key}" but target of {name} not defined')
                 cls.additions[key] = attr
             if hasattr(attr, 'replaces_in_night_mode'):
                 if not target:
-                    raise Exception('Asked to replace "{0}" but target of {1} not defined'.format(key, name))
+                    raise Exception(f'Asked to replace "{key}" but target of {name} not defined')
                 cls.replacements[key] = attr
 
             # TODO: invoke and cache css?
