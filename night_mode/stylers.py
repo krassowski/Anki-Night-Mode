@@ -12,7 +12,7 @@ from aqt.stats import DeckStats
 from .gui import AddonDialog, iterate_widgets
 
 from .config import ConfigValueGetter
-from .internals import percent_escaped, move_args_to_kwargs, from_utf8
+from .internals import percent_escaped, move_args_to_kwargs, from_utf8, PropertyDescriptor
 from .internals import style_tag, wraps, appends_in_night_mode, replaces_in_night_mode, css
 from .styles import SharedStyles, ButtonsStyle, ImageStyle, DeckStyle, LatexStyle, DialogStyle
 from .internals import SnakeNameMixin, StylerMetaclass, abstract_property
@@ -57,7 +57,12 @@ class Styler(RequiringMixin, SnakeNameMixin, metaclass=StylerMetaclass):
 
             for key, replacement in self.replacements.items():
                 self.get_or_create_original(key)
-                setattr(self.target, key, replacement.value(self))
+
+                if isinstance(replacement, PropertyDescriptor):
+                    replacement = replacement.value(self)
+
+                setattr(self.target, key, replacement)
+
         except (AttributeError, TypeError):
             print('Failed to inject style to:', self.target, key, self.name)
             raise

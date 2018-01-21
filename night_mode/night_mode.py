@@ -80,7 +80,6 @@ class StylingManager:
         ]
 
     def replace(self):
-        print(self.active_stylers)
         for styler in self.active_stylers:
             styler.replace_attributes()
 

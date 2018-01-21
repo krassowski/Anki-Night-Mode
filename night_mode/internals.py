@@ -234,13 +234,12 @@ class StylerMetaclass(AbstractRegisteringType):
 
                 new = wrap(original, callback_maker(attr), attr.position)
 
-                # for classes, just add the new function, it will be bound later
-                if isclass(target):
-                    setattr(target, key, new)
-                # instances need some more work: we need to bind!
-                else:
-                    bound_method = MethodType(new, target)
-                    setattr(target, key, bound_method)
+                # for classes, just add the new function, it will be bound later,
+                # but instances need some more work: we need to bind!
+                if not isclass(target):
+                    new = MethodType(new, target)
+
+                cls.replacements[key] = new
 
             if hasattr(attr, 'appends_in_night_mode'):
                 if not target:
@@ -261,8 +260,9 @@ def wraps(method=None, position='after'):
 
     Args:
         method: a function method to be wrapped
-        position: After, before or around
+        position: after, before or around
     """
+
     if not method:
         def wraps_inner(func):
             return wraps(method=func, position=position)

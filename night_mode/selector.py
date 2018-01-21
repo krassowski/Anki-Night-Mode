@@ -18,7 +18,6 @@ class StylerCheckButton(QCheckBox):
         self.parent.update(self.styler, state)
 
 
-# TODO: does not work with @wraps; once fixed, some ifs could  be removed
 class StylersSelectorWindow(AddonDialog):
 
     def __init__(self, parent, disabled_stylers: set, all_stylers, title='Choose what to style', on_update=None):
@@ -44,8 +43,7 @@ class StylersSelectorWindow(AddonDialog):
 
         header = QLabel(
             'Select which parts of Anki should be displayed '
-            'in eye-friendly, dark colors.\n\n'
-            'Please remember to restart Anki to see the changes applied.'
+            'in eye-friendly, dark colors.'
         )
         header.setAlignment(Qt.AlignCenter)
 
