@@ -157,6 +157,11 @@ class ReviewerStyler(Styler):
             border-color:#444!important;
             color:#eee!important
         }
+        .card input::selection
+        {
+            color: """ + self.config.color_t + """;
+            background: #0864d4
+        }
         .typeGood
         {
             color:black;
@@ -196,7 +201,6 @@ class ReviewerStyler(Styler):
         card_color = """
         .card{
             color:""" + self.config.color_t + """!important;
-            background-color:" + color_b + "!important
         }
         """
 
