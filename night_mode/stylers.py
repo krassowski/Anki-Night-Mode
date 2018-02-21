@@ -393,7 +393,7 @@ class BrowserStyler(Styler):
         return f"""
             QTableView
             {{
-                color: {self.config.color_t};
+                selection-color: {self.config.color_t};
                 alternate-background-color: {self.config.color_s};
                 gridline-color: {self.config.color_s};
                 {self.shared.colors}
