@@ -127,6 +127,7 @@ class NightMode:
 
         addHook('unloadProfile', self.save)
         addHook('profileLoaded', self.load)
+
         addHook('showQuestion', self.take_care_of_night_class)
         addHook('showAnswer', self.take_care_of_night_class)
 
@@ -201,7 +202,7 @@ class NightMode:
 
     def message_box(self):
         box = QMessageBox()
-        if self.config.state_on:
+        if self.config.state_on.value:
             box_style = MessageBoxStyle(self)
             box.setStyleSheet(box_style.style)
         return box
@@ -211,7 +212,7 @@ class NightMode:
         if not web_object:
             web_object = mw.reviewer.web
 
-        if self.config.state_on:
+        if self.config.state_on.value:
             javascript = """
             current_classes = document.body.className;
             if(current_classes.indexOf("night_mode") == -1)
