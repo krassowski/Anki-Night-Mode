@@ -52,7 +52,7 @@ class StylersSelectorWindow(AddonDialog):
         stylers = QVBoxLayout()
         stylers.setAlignment(Qt.AlignTop)
 
-        for styler in self.all_stylers:
+        for styler in sorted(self.all_stylers, key=lambda s: s.name):
             styler_checkbox = StylerCheckButton(self, styler)
             stylers.addWidget(styler_checkbox)
 
