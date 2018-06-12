@@ -28,6 +28,7 @@ Special thanks to contributors: [github nickname (reason)]
 - colchizin
 - JulyMorning
 - nathanmalloy
+- rathsky
 """
 import traceback
 
@@ -46,7 +47,7 @@ from .stylers import Styler
 from .styles import Style, MessageBoxStyle
 
 __addon_name__ = 'Night Mode'
-__version__ = '2.1.6'
+__version__ = '2.1.7'
 __anki_version__ = '2.1'
 
 
