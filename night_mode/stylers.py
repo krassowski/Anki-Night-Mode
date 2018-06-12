@@ -113,9 +113,7 @@ class ReviewerStyler(Styler):
     target = mw.reviewer
     require = {
         SharedStyles,
-        ButtonsStyle,
-        LatexStyle,
-        ImageStyle
+        ButtonsStyle
     }
 
     @wraps(position='around')
@@ -140,6 +138,15 @@ class ReviewerStyler(Styler):
             color:#ddd
         }
         """
+
+
+class ReviewerCards(Styler):
+
+    target = mw.reviewer
+    require = {
+        LatexStyle,
+        ImageStyle
+    }
 
     # TODO: it can be implemented with a nice decorator
     @wraps(position='around')
