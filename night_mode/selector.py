@@ -26,6 +26,8 @@ class StylersSelectorWindow(AddonDialog):
         self.disabled_stylers = disabled_stylers
         self.all_stylers = all_stylers
 
+        self.stylers_checkboxes = []
+        self.stylers_layout = None
         self.init_ui(title)
 
     def init_ui(self, title):
@@ -54,11 +56,18 @@ class StylersSelectorWindow(AddonDialog):
 
         for styler in sorted(self.all_stylers, key=lambda s: s.name):
             styler_checkbox = StylerCheckButton(self, styler)
+            self.stylers_checkboxes.append(styler_checkbox)
             stylers.addWidget(styler_checkbox)
 
-        self.stylers_checkboxes = stylers
+        self.stylers_layout = stylers
+
+        checked_boxes = sum(1 for checkbox in self.stylers_checkboxes if checkbox.isChecked())
+        check_all = QCheckBox('Check/uncheck all', self)
+        check_all.setChecked(checked_boxes > len(self.stylers_checkboxes) / 2)
+        check_all.stateChanged.connect(self.check_uncheck_all)
 
         body.addWidget(header)
+        body.addWidget(check_all)
         body.addLayout(stylers)
         body.addStretch(1)
         body.addLayout(buttons)
@@ -66,6 +75,10 @@ class StylersSelectorWindow(AddonDialog):
 
         self.setGeometry(300, 300, 350, 300)
         self.show()
+
+    def check_uncheck_all(self, state):
+        for checkbox in self.stylers_checkboxes:
+            checkbox.setChecked(state)
 
     def update(self, styler, value):
         if value:
