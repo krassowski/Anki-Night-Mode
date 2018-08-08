@@ -5,6 +5,7 @@ from anki.stats import CollectionStats
 from aqt import mw, editor
 from aqt.addcards import AddCards
 from aqt.browser import Browser
+from aqt.clayout import CardLayout
 from aqt.editcurrent import EditCurrent
 from aqt.editor import Editor
 from aqt.progress import ProgressManager
@@ -666,6 +667,34 @@ class EditorStyler(Styler):
         QLineEdit
         {{
             {self.completer}
+        }}
+        """
+
+
+class CardLayoutStyler(Styler):
+    """Card Types modal window"""
+
+    target = CardLayout
+    require = {
+          SharedStyles,
+    }
+
+    @wraps
+    def init(self, card_layout, *args, **kwargs):
+        if self.config.enable_in_dialogs:
+            card_layout.mainArea.setStyleSheet(self.qt_style)
+
+    @css
+    def qt_style(self):
+        return f"""
+        QGroupBox::title
+        {{
+            {self.shared.colors}
+        }}
+        QTextEdit
+        {{
+            color: {self.config.color_t};
+            background-color: {self.config.color_s}
         }}
         """
 
