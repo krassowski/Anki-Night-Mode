@@ -129,8 +129,7 @@ class NightMode:
         addHook('unloadProfile', self.save)
         addHook('profileLoaded', self.load)
 
-        addHook('showQuestion', self.take_care_of_night_class)
-        addHook('showAnswer', self.take_care_of_night_class)
+        addHook('prepareQA', self.night_class_injection)
 
     def load(self):
         """
@@ -208,29 +207,38 @@ class NightMode:
             box.setStyleSheet(box_style.style)
         return box
 
-    def take_care_of_night_class(self, web_object=None):
-
-        if not web_object:
-            web_object = mw.reviewer.web
+    def night_class_injection(self, html, card, context):
 
         if self.config.state_on.value:
             javascript = """
-            current_classes = document.body.className;
-            if(current_classes.indexOf("night_mode") == -1)
-            {
-                document.body.className += " night_mode";
+            function add_night_mode_class(){
+                current_classes = document.body.className;
+                if(current_classes.indexOf("night_mode") == -1)
+                {
+                    document.body.className += " night_mode";
+                }
             }
+            // explanation of setTimeout use:
+            // callback defined in _showQuestion of reviewer.js would otherwise overwrite
+            // the newly set body class; in order to prevent that the function execution
+            // is being placed on the end of execution queue (hence time = 0)
+            setTimeout(add_night_mode_class, 0)
             """
         else:
             javascript = """
-            current_classes = document.body.className;
-            if(current_classes.indexOf("night_mode") != -1)
-            {
-                document.body.className = current_classes.replace("night_mode","");
+            function remove_night_mode_class(){
+                current_classes = document.body.className;
+                if(current_classes.indexOf("night_mode") != -1)
+                {
+                    document.body.className = current_classes.replace("night_mode","");
+                }
             }
+            setTimeout(remove_night_mode_class, 0)
             """
-
-        web_object.eval(javascript)
+        # script on the beginning of the HTML so it will always be
+        # before any user-defined, potentially malformed HTML
+        html = f"<script>{javascript}</script>" + html
+        return html
 
 
 ERROR_NO_PROFILE = """Switching night mode failed: The profile is not loaded yet.
