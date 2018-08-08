@@ -382,7 +382,7 @@ class BrowserStyler(Styler):
         return """
         QSplitter::handle
         {
-            background:#000
+            background: #000
         }
         #""" + from_utf8("widget") + """, QTreeView
         {
@@ -398,7 +398,20 @@ class BrowserStyler(Styler):
             color: """ + self.config.color_t + """;
             background:""" + self.config.color_a + """
         }
-        """
+        """ + (
+            """
+            /* make the splitter light-dark (match all widgets as selecting with QSplitter does not work) */
+            QWidget{
+                background-color: """ + self.config.color_s + """;
+            }
+            /* make sure that no other important widgets - like tags box - are light-dark */
+            QGroupBox{
+                background-color: """ + self.config.color_b + """;
+            }
+            """
+            if self.config.style_scroll_bars else
+            ''
+        )
 
     @css
     def table(self):
