@@ -188,6 +188,16 @@ class EnableInDialogs(Setting, MenuAction):
         self.value = not self.value
 
 
+class StyleScrollBars(Setting, MenuAction):
+    value = True
+    label = 'Dark Scroll Bars'
+    checkable = True
+
+    def action(self):
+        self.value = not self.value
+        self.app.refresh()
+
+
 class ModeSettings(Setting, MenuAction):
     value = {
         'mode': 'manual',

@@ -137,7 +137,7 @@ class ButtonsStyle(Style):
 
     @css
     def qt(self):
-        return self.advanced_qt()
+        return self.advanced_qt() + (self.qt_scrollbars if self.config.style_scroll_bars else '')
 
     def advanced_qt(self, restrict_to_parent='', restrict_to=''):
         return """
@@ -168,6 +168,67 @@ class ButtonsStyle(Style):
         }
         """
 
+    scrollbar_size = 15
+    scrollbar_background = '#313d45'
+    scrollbar_color = '#515d71'
+
+    @css
+    def qt_scrollbars(self):
+        return f"""
+        QScrollBar:horizontal, QScrollBar:vertical {{
+            background: {self.scrollbar_background};
+        }}
+        QScrollBar::handle:horizontal, QScrollBar::handle:vertical {{
+            background: {self.scrollbar_color};
+        }}
+        QScrollBar {{
+            margin: 0
+        }}
+        QScrollBar:vertical {{
+            width: {self.scrollbar_size}px;
+        }}
+        QScrollBar:horizontal {{
+            height: {self.scrollbar_size}px;
+        }}
+        QScrollBar::handle {{
+            margin: 4px;
+            border-radius: 3px
+        }}
+        QScrollBar::handle:vertical {{
+            min-height: 20px;
+        }}
+        QScrollBar::handle:horizontal {{
+            min-width: 20px;
+        }}
+        QScrollBar::add-line, QScrollBar::sub-line {{
+            border: none;
+            background: none;
+        }}
+        QScrollBar:left-arrow, QScrollBar::right-arrow, QScrollBar:up-arrow, QScrollBar::down-arrow {{
+            border: none;
+            background: none;
+            color: none
+        }}
+        """
+
+    @css
+    def scrollbars(self):
+        return f"""
+        ::-webkit-scrollbar{{
+            width: {self.scrollbar_size - 8}px;
+        }}
+        ::-webkit-scrollbar:horizontal {{
+            height: {self.scrollbar_size - 8}px;
+        }}
+        ::-webkit-scrollbar-track {{
+            background: {self.scrollbar_background};
+        }}
+        ::-webkit-scrollbar-thumb {{
+            background: {self.scrollbar_color};
+            border-radius: 4px;
+        }}
+        """
+
     @css
     def html(self):
         return f"""
@@ -194,7 +255,7 @@ class ButtonsStyle(Style):
             background: gradient(linear, left top, left bottom, color-stop(3%,#20282D), color-stop(51%,#252E34), color-stop(100%,#222A30));
             box-shadow: 1px 1px 1px rgba(255,255,255,0.1);
         }}
-        """
+        """ + (self.scrollbars if self.config.style_scroll_bars else '')
 
 
 class DeckStyle(Style):
@@ -316,38 +377,38 @@ class DialogStyle(Style):
     @css
     def style(self):
         return """
-                QDialog,QLabel,QListWidget,QFontComboBox,QCheckBox,QSpinBox,QRadioButton,QHBoxLayout
-                {
-                """ + self.shared.colors + """
-                }
-                QFontComboBox::drop-down{border: 0px; border-left: 1px solid #555; width: 30px;}
-                QFontComboBox::down-arrow{width:12px; height:8px;
-                    top:1px;
-                    image:url('""" + self.app.icons.arrow + """')
-                }
-                QFontComboBox, QSpinBox{border: 1px solid #555}
+            QDialog,QLabel,QListWidget,QFontComboBox,QCheckBox,QSpinBox,QRadioButton,QHBoxLayout
+            {
+            """ + self.shared.colors + """
+            }
+            QFontComboBox::drop-down{border: 0px; border-left: 1px solid #555; width: 30px;}
+            QFontComboBox::down-arrow{width:12px; height:8px;
+                top:1px;
+                image:url('""" + self.app.icons.arrow + """')
+            }
+            QFontComboBox, QSpinBox{border: 1px solid #555}
 
-                QTabWidget QWidget
-                {
-                    color:""" + self.config.color_t + """;
-                    background-color:#222;
-                    border-color:#555
-                }
-                QTabWidget QLabel {
-                    position:relative
-                }
-                QTabWidget QTabBar
-                {
-                    color:#000
-                }
-                QTabWidget QTextEdit
-                {
-                    border-color:#555
-                }
-                QTabWidget QGroupBox::title
-                {
-                    subcontrol-origin: margin;
-                    subcontrol-position:top left;
-                    margin-top:-7px
-                }
-                """ + self.buttons.advanced_qt("QTabWidget")
+            QTabWidget QWidget
+            {
+                color:""" + self.config.color_t + """;
+                background-color:#222;
+                border-color:#555
+            }
+            QTabWidget QLabel {
+                position:relative
+            }
+            QTabWidget QTabBar
+            {
+                color:#000
+            }
+            QTabWidget QTextEdit
+            {
+                border-color:#555
+            }
+            QTabWidget QGroupBox::title
+            {
+                subcontrol-origin: margin;
+                subcontrol-position:top left;
+                margin-top:-7px
+            }
+            """ + self.buttons.advanced_qt("QTabWidget")

@@ -107,6 +107,7 @@ class NightMode:
         ModeSettings,
         UserColorMap,
         DisabledStylers,
+        StyleScrollBars,
         '-',
         About
     ]
