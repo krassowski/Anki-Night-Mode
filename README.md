@@ -55,3 +55,13 @@ Don't forget to comment and grade it on [Anki webpage](https://ankiweb.net/share
 ### For developers
 
 Feel free to contribute, send bug reports or feature requests :)
+
+#### Custom CSS in night mode
+
+You may use `night_mode` class, to overwrite some of the CSS rules; sometimes usage of `important!` directive or catch-all selector (`*`) will be needed to enforce you own styling. Example:
+
+```css
+.night_mode *{
+    color: red;
+}
+```
