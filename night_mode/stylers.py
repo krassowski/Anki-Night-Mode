@@ -393,7 +393,7 @@ class BrowserStyler(Styler):
         return """
         QSplitter::handle
         {
-            background: #000
+            /* handled below as QWidget */
         }
         #""" + from_utf8("widget") + """, QTreeView
         {
@@ -402,12 +402,12 @@ class BrowserStyler(Styler):
         QTreeView::item:selected:active, QTreeView::branch:selected:active
         {
             color: """ + self.config.color_t + """;
-            background:""" + self.config.color_a + """
+            background-color:""" + self.config.color_a + """
         }
         QTreeView::item:selected:!active, QTreeView::branch:selected:!active
         {
             color: """ + self.config.color_t + """;
-            background:""" + self.config.color_a + """
+            background-color:""" + self.config.color_a + """
         }
         """ + (
             """
