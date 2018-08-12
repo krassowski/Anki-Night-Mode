@@ -178,6 +178,9 @@ class ButtonsStyle(Style):
         QScrollBar:horizontal, QScrollBar:vertical {{
             background: {self.scrollbar_background};
         }}
+        QScrollBar:add-page, QScrollBar:sub-page{{
+            background: {self.scrollbar_background};
+        }}
         QScrollBar::handle:horizontal, QScrollBar::handle:vertical {{
             background: {self.scrollbar_color};
         }}
