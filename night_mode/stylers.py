@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt
 
 import aqt
 from anki.stats import CollectionStats
-from aqt import mw, editor
+from aqt import mw, editor, QPixmap
 from aqt.addcards import AddCards
 from aqt.browser import Browser
 from aqt.clayout import CardLayout
@@ -357,6 +357,17 @@ class BrowserStyler(Styler):
     def _renderPreview(self, browser, cardChanged=False):
         if browser._previewWindow:
             self.app.take_care_of_night_class(web_object=browser._previewWeb)
+
+    @wraps
+    def buildTree(self, browser):
+        root = browser.sidebarTree
+        for item in root.findItems('', Qt.MatchContains | Qt.MatchRecursive):
+            icon = item.icon(0)
+            pixmap = icon.pixmap(32, 32)
+            image = pixmap.toImage()
+            image.invertPixels()
+            new_icon = aqt.QIcon(QPixmap.fromImage(image))
+            item.setIcon(0, new_icon)
 
     @wraps(position='around')
     def _cardInfoData(self, browser, _old):
