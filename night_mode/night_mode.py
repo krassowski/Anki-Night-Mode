@@ -116,7 +116,7 @@ class NightMode:
         self.profile_loaded = False
         self.config = Config(self, prefix='nm_')
         self.config.init_settings()
-        self.icons = Icons()
+        self.icons = Icons(mw)
         self.styles = StylingManager(self)
 
         view_menu = get_or_create_menu('addon_view_menu', '&View')
