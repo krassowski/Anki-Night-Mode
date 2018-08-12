@@ -32,7 +32,7 @@ class Icons:
             image = inverted_icon(down_arrow_icon, width=16, height=16, as_image=True)
             image.save(icon_path)
 
-        arrow_path = icon_path
+        arrow_path = icon_path.replace('\\', '/')
 
         where_to_look_for_arrow_icon = [
             '/usr/share/icons/Adwaita/scalable/actions/pan-down-symbolic.svg',
