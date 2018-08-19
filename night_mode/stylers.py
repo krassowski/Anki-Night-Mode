@@ -414,6 +414,7 @@ class BrowserStyler(Styler):
             /* make the splitter light-dark (match all widgets as selecting with QSplitter does not work) */
             QWidget{
                 background-color: """ + self.config.color_s + """;
+                color: """ + self.config.color_t + """;
             }
             /* make sure that no other important widgets - like tags box - are light-dark */
             QGroupBox{
