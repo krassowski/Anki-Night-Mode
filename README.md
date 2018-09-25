@@ -52,9 +52,12 @@ Don't forget to comment and grade it on [Anki webpage](https://ankiweb.net/share
 
 ![Preview](https://raw.githubusercontent.com/krassowski/Anki-Night-Mode/master/preview.png)
 
-### For developers
+### For developers & translators
 
 Feel free to contribute, send bug reports or feature requests :)
+
+If you can translate the add-on to your language, please join us [at POEditor](https://poeditor.com/join/project/0waBVUY8oC).
+
 
 #### Custom CSS in night mode
 
