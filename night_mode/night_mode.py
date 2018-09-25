@@ -18,7 +18,7 @@ If you want to contribute visit GitHub page: https://github.com/krassowski/Anki-
 Also, feel free to send me bug reports or feature requests.
 
 Copyright: Michal Krassowski <krassowski.michal@gmail.com>
-License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
+License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html except when stated otherwise.
 
 Special thanks to contributors: [github nickname (reason)]
 
@@ -132,6 +132,8 @@ class NightMode:
 
         addHook('prepareQA', self.night_class_injection)
 
+        addHook('loadNote', self.background_bug_workaround)
+
     def load(self):
         """
         Load configuration from profile, set states of checkable menu objects
@@ -240,6 +242,67 @@ class NightMode:
         # before any user-defined, potentially malformed HTML
         html = f"<script>{javascript}</script>" + html
         return html
+
+    def background_bug_workaround(self, editor):
+
+        if self.config.state_on.value:
+            javascript = """
+            (function bg_bug_workaround()
+            {
+                function getTextNodeAtPosition(root, index){
+                    // Copyright notice:
+                    //
+                    //  following function was created by Pery Mimon:
+                    //      https://stackoverflow.com/a/38479462
+                    //  and is distributed under CC-BY SA 3.0 license terms:
+                    //      https://creativecommons.org/licenses/by-sa/3.0/
+
+                    var lastNode = null;
+
+                    var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT,function next(elem) {
+                        if(index >= elem.textContent.length){
+                            index -= elem.textContent.length;
+                            lastNode = elem;
+                            return NodeFilter.FILTER_REJECT
+                        }
+                        return NodeFilter.FILTER_ACCEPT;
+                    });
+                    var c = treeWalker.nextNode();
+                    return {
+                        node: c ? c: root,
+                        position: c ? index:  0
+                    };
+                }
+
+                var regex = /<span style="background-color: rgb\(255, 255, 255\);">(.*?)<\/span>/gm
+
+                $('.field').on('keyup', function(e){
+                    if(e.which === 8){
+
+                        var field = $(this)
+                        var html = field.html()
+
+                        var selection = window.getSelection()
+                        var range = selection.getRangeAt(0)
+                        range.setStart(this, 0)
+                        var len = range.toString().length
+
+                        field.html(html.replace(regex, '$1'))
+
+                        var range = new Range();
+                        var pos = getTextNodeAtPosition(this, len);
+                        range.setStart(pos.node, pos.position)
+
+                        selection.removeAllRanges()
+                        selection.addRange(range)
+                    }
+                })
+            })()
+            """
+        else:
+            javascript = ''
+
+        editor.web.eval(javascript)
 
 
 ERROR_NO_PROFILE = """Switching night mode failed: The profile is not loaded yet.
