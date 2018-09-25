@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton, QColorDia
 
 from .internals import alert
 from .gui import create_button, remove_layout, AddonDialog
+from .languages import _
 
 
 class ColorSwatch(QPushButton):
@@ -28,7 +29,7 @@ class ColorSwatch(QPushButton):
         if color:
             self.set_color(color)
         else:
-            self.setText('(Not specified)')
+            self.setText(_('(Not specified)'))
 
         self.clicked.connect(self.pick_color)
 
@@ -54,13 +55,13 @@ class ColorSwatch(QPushButton):
         qt_color = QColorDialog.getColor(
             qt_color,
             parent=self,
-            title='Select %s' % self.name
+            title=_('Select %s') % _(self.name)
         )
 
         if qt_color.isValid():
             color = qt_color.name()
             if self.verify_colors and not self.parent.is_acceptable(color):
-                alert(f'This color ({color}) is already mapped. Please select a different one.')
+                alert(_('This color (%s) is already mapped. Please select a different one.') % color)
                 return self.pick_color(qt_color=qt_color)
 
             self.set_color(color)
@@ -124,7 +125,7 @@ class ColorMapWindow(AddonDialog):
         self.init_ui(title)
 
     def init_ui(self, title):
-        self.setWindowTitle(title)
+        self.setWindowTitle(_(title))
 
         btn_add_mapping = create_button('+ Add colors mapping', self.on_add)
         btn_close = create_button('Close', self.close)
@@ -138,10 +139,10 @@ class ColorMapWindow(AddonDialog):
         body = QVBoxLayout()
         body.setAlignment(Qt.AlignTop)
 
-        header = QLabel(
+        header = QLabel(_(
             'Specify how particular colors on your cards '
             'should be swapped when the night mode is on.'
-        )
+        ))
         header.setAlignment(Qt.AlignCenter)
 
         mappings = QVBoxLayout()

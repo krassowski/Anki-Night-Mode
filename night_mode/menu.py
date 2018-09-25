@@ -1,8 +1,9 @@
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QAction, QMenu
 
-from anki.lang import _
 from aqt import mw
+
+from .languages import _
 
 
 def get_or_create_menu(attribute_name, label):
@@ -15,8 +16,11 @@ def get_or_create_menu(attribute_name, label):
             mw.form.menuTools.menuAction(),
             menu
         )
+    else:
+        menu = getattr(mw, attribute_name)
+        menu.setTitle(_(label))
 
-    return getattr(mw, attribute_name)
+    return menu
 
 
 class Menu:

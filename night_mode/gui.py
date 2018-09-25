@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import QPushButton, QDialog
 
+from .languages import _
+
 
 class AddonDialog(QDialog):
     def __init__(self, *args, **kwargs):
@@ -7,7 +9,7 @@ class AddonDialog(QDialog):
 
 
 def create_button(name, callback=None):
-    button = QPushButton(name)
+    button = QPushButton(_(name))
     if callback:
         button.clicked.connect(callback)
     return button

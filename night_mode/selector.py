@@ -2,12 +2,13 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel, QHBoxLayout, QVBoxLayout, QCheckBox
 
 from .gui import create_button, AddonDialog
+from .languages import _
 
 
 class StylerCheckButton(QCheckBox):
 
     def __init__(self, parent, styler):
-        QCheckBox.__init__(self, styler.friendly_name, parent)
+        QCheckBox.__init__(self, _(styler.friendly_name), parent)
         self.styler = styler
         if styler.is_active:
             self.toggle()
@@ -20,7 +21,7 @@ class StylerCheckButton(QCheckBox):
 
 class StylersSelectorWindow(AddonDialog):
 
-    def __init__(self, parent, disabled_stylers: set, all_stylers, title='Choose what to style', on_update=None):
+    def __init__(self, parent, disabled_stylers: set, all_stylers, title=_('Choose what to style'), on_update=None):
         super().__init__(self, parent, Qt.Window)
         self.on_update = on_update
         self.disabled_stylers = disabled_stylers
@@ -43,12 +44,12 @@ class StylersSelectorWindow(AddonDialog):
         body = QVBoxLayout()
         body.setAlignment(Qt.AlignTop)
 
-        header = QLabel(
+        header = QLabel(_(
             'Select which parts of Anki should be displayed '
             'in eye-friendly, dark colors.\n\n'
             'To disable all dialog windows, '
             'use the "Enable in dialogs" switch which is available in menu.'
-        )
+        ))
         header.setAlignment(Qt.AlignCenter)
 
         stylers = QVBoxLayout()
@@ -62,7 +63,7 @@ class StylersSelectorWindow(AddonDialog):
         self.stylers_layout = stylers
 
         checked_boxes = sum(1 for checkbox in self.stylers_checkboxes if checkbox.isChecked())
-        check_all = QCheckBox('Check/uncheck all', self)
+        check_all = QCheckBox(_('Check/uncheck all'), self)
         check_all.setChecked(checked_boxes > len(self.stylers_checkboxes) / 2)
         check_all.stateChanged.connect(self.check_uncheck_all)
 
