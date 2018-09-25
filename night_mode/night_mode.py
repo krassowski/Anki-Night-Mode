@@ -276,25 +276,30 @@ class NightMode:
 
                 var regex = /<span style="background-color: rgb\(255, 255, 255\);">(.*?)<\/span>/gm
 
-                $('.field').on('keyup', function(e){
-                    if(e.which === 8){
+                $('.field').on('keydown', function(e){
+                    var raw_field = this
 
-                        var field = $(this)
+                    function get_rid_of_background(){
+                        var field = $(raw_field)
                         var html = field.html()
 
                         var selection = window.getSelection()
                         var range = selection.getRangeAt(0)
-                        range.setStart(this, 0)
+                        range.setStart(raw_field, 0)
                         var len = range.toString().length
 
                         field.html(html.replace(regex, '$1'))
 
                         var range = new Range();
-                        var pos = getTextNodeAtPosition(this, len);
+                        var pos = getTextNodeAtPosition(raw_field, len);
                         range.setStart(pos.node, pos.position)
 
                         selection.removeAllRanges()
                         selection.addRange(range)
+                    }
+
+                    if(e.which === 8){
+                        window.setTimeout(get_rid_of_background, 0)
                     }
                 })
             })()
