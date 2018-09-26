@@ -287,6 +287,9 @@ class NightMode:
                         var field = $(raw_field)
                         var html = field.html()
 
+                        if(html.search(regex) == -1)
+                            return
+
                         var selection = window.getSelection()
                         var range = selection.getRangeAt(0)
                         range.setStart(raw_field, 0)
