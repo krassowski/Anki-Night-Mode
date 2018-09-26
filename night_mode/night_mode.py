@@ -29,6 +29,10 @@ Special thanks to contributors: [github nickname (reason)]
 - JulyMorning
 - nathanmalloy
 - rathsky
+
+Special thanks to translators:
+- Arman High (Armenian)
+- Jeremias (Swedish)
 """
 import traceback
 
