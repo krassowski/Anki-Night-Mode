@@ -256,15 +256,17 @@ class NightMode:
                 function getTextNodeAtPosition(root, index){
                     // Copyright notice:
                     //
-                    //  following function was created by Pery Mimon:
+                    //  following function is based on a function created by Pery Mimon:
                     //      https://stackoverflow.com/a/38479462
                     //  and is distributed under CC-BY SA 3.0 license terms:
                     //      https://creativecommons.org/licenses/by-sa/3.0/
 
                     var lastNode = null;
+                    var lastIndex = null
 
                     var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT,function next(elem) {
                         if(index >= elem.textContent.length){
+                            lastIndex = index
                             index -= elem.textContent.length;
                             lastNode = elem;
                             return NodeFilter.FILTER_REJECT
@@ -273,16 +275,15 @@ class NightMode:
                     });
                     var c = treeWalker.nextNode();
                     return {
-                        node: c ? c: root,
-                        position: c ? index:  0
+                        node: c ? c : lastNode,
+                        position: c ? index : lastIndex
                     };
                 }
 
                 var regex = /<span style="background-color: rgb\(255, 255, 255\);">(.*?)<\/span>/gm
 
-                $('.field').on('keydown', function(e){
-                    var raw_field = this
-
+                function background_workaround_callback(raw_field)
+                {
                     function get_rid_of_background(){
                         var field = $(raw_field)
                         var html = field.html()
@@ -297,18 +298,35 @@ class NightMode:
 
                         field.html(html.replace(regex, '$1'))
 
-                        var range = new Range();
-                        var pos = getTextNodeAtPosition(raw_field, len);
+                        var range = new Range()
+                        var pos = getTextNodeAtPosition(raw_field, len)
+
                         range.setStart(pos.node, pos.position)
 
                         selection.removeAllRanges()
                         selection.addRange(range)
                     }
+                    return get_rid_of_background
+                }
 
-                    if(e.which === 8){
+                var field = $('.field')
+
+                field.on('keydown', function(e){
+                    var raw_field = this
+                    var get_rid_of_background = background_workaround_callback(raw_field)
+
+                    if(e.which === 8 || e.which == 46){
                         window.setTimeout(get_rid_of_background, 0)
                     }
                 })
+
+                field.on('paste', function(){
+                    var raw_field = this
+                    var get_rid_of_background = background_workaround_callback(raw_field)
+
+                    window.setTimeout(get_rid_of_background, 100)
+                })
+
             })()
             """
         else:
