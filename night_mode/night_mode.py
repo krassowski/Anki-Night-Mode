@@ -33,6 +33,7 @@ Special thanks to contributors: [github nickname (reason)]
 Special thanks to translators:
 - Arman High (Armenian)
 - Jeremias (Swedish)
+- Is (German)
 """
 import traceback
 
@@ -51,7 +52,7 @@ from .stylers import Styler
 from .styles import Style, MessageBoxStyle
 
 __addon_name__ = 'Night Mode'
-__version__ = '2.2.1'
+__version__ = '2.2.2'
 __anki_version__ = '2.1'
 
 
