@@ -13,6 +13,7 @@ from aqt.stats import DeckStats
 from .gui import AddonDialog, iterate_widgets
 
 from .config import ConfigValueGetter
+from .css_class import inject_css_class
 from .internals import percent_escaped, move_args_to_kwargs, from_utf8, PropertyDescriptor
 from .internals import style_tag, wraps, appends_in_night_mode, replaces_in_night_mode, css
 from .styles import SharedStyles, ButtonsStyle, ImageStyle, DeckStyle, LatexStyle, DialogStyle
@@ -231,10 +232,9 @@ class DeckBrowserStyler(Styler):
     }
 
     @appends_in_night_mode
-    @style_tag
-    @percent_escaped
     def _body(self):
-        return self.deck.style + self.shared.body_colors
+        styles_html = style_tag(percent_escaped(self.deck.style + self.shared.body_colors))
+        return inject_css_class(True, styles_html)
 
 
 class DeckBrowserBottomStyler(Styler):
@@ -245,10 +245,9 @@ class DeckBrowserBottomStyler(Styler):
     }
 
     @appends_in_night_mode
-    @style_tag
-    @percent_escaped
     def _centerBody(self):
-        return self.deck.bottom
+        styles_html = style_tag(percent_escaped(self.deck.bottom))
+        return inject_css_class(True, styles_html)
 
 
 class OverviewStyler(Styler):
@@ -260,10 +259,9 @@ class OverviewStyler(Styler):
     }
 
     @appends_in_night_mode
-    @style_tag
-    @percent_escaped
     def _body(self):
-        return self.css
+        styles_html = style_tag(percent_escaped(self.css))
+        return inject_css_class(True, styles_html)
 
     @css
     def css(self):
