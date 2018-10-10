@@ -253,7 +253,7 @@ class NightMode:
                     };
                 }
 
-                var regex = /<span style="background-color: rgb\(255, 255, 255\);">(.*?)<\/span>/gm
+                var regex = /<(span|strong) style="background-color: rgb\(255, 255, 255\);">(.*?)<\/(span|strong)>/gm
 
                 function background_workaround_callback(raw_field)
                 {
@@ -269,7 +269,7 @@ class NightMode:
                         range.setStart(raw_field, 0)
                         var len = range.toString().length
 
-                        field.html(html.replace(regex, '$1'))
+                        field.html(html.replace(regex, '<$1>$2</$1>'))
 
                         var range = new Range()
                         var pos = getTextNodeAtPosition(raw_field, len)
