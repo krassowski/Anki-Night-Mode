@@ -1,3 +1,49 @@
+### 2.2.3
+*October 24, 2018*
+- Apply night_mode class to Overview and DeckBrowser for future compatibility with Review Heatmap 0.7
+- Improve the white background workaround to handle text including bold elements
+
+### 2.2.2
+*September 26, 2018*
+- Add German translation (by Is)
+- Improve the workaround eliminating white backgrounds after using "backspace", "delete", or pasting
+
+### 2.2.1
+*September 26, 2018*
+- Add Swedish translation (by Jeremias)
+- Fix jumping cursor when deleting the last letter in the edit field
+
+### 2.2.0
+*September 25, 2018*
+- Add Armenian (by Arman High) and Polish translations <a href="https://github.com/krassowski/Anki-Night-Mode/issues/47" rel="nofollow">#47</a>
+- Workaround a bug causing white background to appear after deleting a new line <a href="https://github.com/krassowski/Anki-Night-Mode/issues/27" rel="nofollow">#27</a>
+- Ensure that text in HTML/Latex edit windows are readable <a href="https://github.com/krassowski/Anki-Night-Mode/issues/44" rel="nofollow">#44</a>
+
+### 2.1.9
+*August 11, 2018*
+- Invert icons in sidebar of browser <a href="https://github.com/krassowski/Anki-Night-Mode/issues/28" rel="nofollow">#28</a>
+- Improve dark scrollbars appearance on Windows
+- Make it possible to use arrow-down icon in browser on Windows again
+- Improve horizontal splitter styling in browser
+
+### 2.1.8
+*August 8, 2018*
+- Add dark styling of scrollbars <a href="https://github.com/krassowski/Anki-Night-Mode/issues/35" rel="nofollow">#35</a>
+- Improve styling of CardLayout (card types) modal window
+- Fix night_mode CSS class being overwritten on question side by the new, fancy Anki fade-in transition logic <a href="https://github.com/krassowski/Anki-Night-Mode/issues/41" rel="nofollow">#41</a>
+
+### 2.1.7
+*June 12, 2018*
+- Allow to selectively disable reviewer card's styling in the "Choose what to style" dialog <a href="https://github.com/krassowski/Anki-Night-Mode/issues/38" rel="nofollow">#38</a>
+- Sort stylers in the "Choose what to style" dialog alphabetically
+- Add "check all / uncheck all" to in "Choose what to style" dialog
+- Fix night_mode CSS class being applied regardless of night mode state <a href="https://github.com/krassowski/Anki-Night-Mode/issues/37" rel="nofollow">#37</a>
+
+### 2.1.6
+*February 21, 2018*
+- Improve visibility of items in table in browser <a href="https://github.com/krassowski/Anki-Night-Mode/issues/28" rel="nofollow">#28</a> (thanks nathanmalloy!)
+- Provide potential workaround for Qt bug causing Chinese text to be rendered black when selected
+
 ### 2.1.5
 *January 21, 2017*
  - Allow to selectively disable parts of the add-on #26, #25
