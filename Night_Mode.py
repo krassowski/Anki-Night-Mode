@@ -644,8 +644,7 @@ def nm_switch():
             nm_off()
         else:
             nm_on()
-        nm_save()
-        runHook("night_mode_state_changed")
+        runHook("night_mode_state_changed", nm_state_on)
 
 
 def nm_endial():
