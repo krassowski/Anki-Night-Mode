@@ -44,7 +44,7 @@ from aqt import appVersion
 
 
 from anki.lang import _
-from anki.hooks import addHook
+from anki.hooks import addHook, runHook
 from anki.hooks import wrap
 from anki.utils import json
 
@@ -644,6 +644,7 @@ def nm_switch():
             nm_off()
         else:
             nm_on()
+        runHook("night_mode_state_changed", nm_state_on)
 
 
 def nm_endial():
