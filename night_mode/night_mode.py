@@ -53,7 +53,7 @@ from .stylers import Styler
 from .styles import Style, MessageBoxStyle
 
 __addon_name__ = 'Night Mode'
-__version__ = '2.2.3'
+__version__ = '2.2.4'
 __anki_version__ = '2.1'
 
 
