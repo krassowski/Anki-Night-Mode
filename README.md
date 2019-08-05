@@ -1,9 +1,6 @@
 # Anki-Night-Mode
 [![Build Status](https://travis-ci.org/krassowski/Anki-Night-Mode.svg?branch=master)](https://travis-ci.org/krassowski/Anki-Night-Mode) [![Code Climate](https://codeclimate.com/github/krassowski/Anki-Night-Mode/badges/gpa.svg)](https://codeclimate.com/github/krassowski/Anki-Night-Mode)
 
-
-__[Wpis po polsku](http://michal.krassowski.info/komentarz,13)__
-
 This plugin adds the function of night mode, similar that one implemented in AnkiDroid.
 
 ### Compatibility
