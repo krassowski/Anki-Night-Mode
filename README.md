@@ -83,6 +83,7 @@ You may use `night_mode` class, to overwrite some of the CSS rules; sometimes us
 }
 ```
 
+### Add-ons compatibility
 
 Add-ons which are known to work well with the night mode:
 - [Anki-TouchScreen](https://github.com/krassowski/Anki-TouchScreen)
