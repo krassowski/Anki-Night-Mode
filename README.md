@@ -1,11 +1,7 @@
 # Anki-Night-Mode
 [![Build Status](https://travis-ci.org/krassowski/Anki-Night-Mode.svg?branch=master)](https://travis-ci.org/krassowski/Anki-Night-Mode) [![Code Climate](https://codeclimate.com/github/krassowski/Anki-Night-Mode/badges/gpa.svg)](https://codeclimate.com/github/krassowski/Anki-Night-Mode)
 
-This plugin adds the function of night mode, similar that one implemented in AnkiDroid.
-
-### Compatibility
-
-The add-on supports Anki 2.1 version. While there is an older version of the add-on written for Anki 2.0, it is no longer supported as Anki 2.0 uses [well oudated and unsecure](https://github.com/krassowski/Anki-Night-Mode/issues/79#issuecomment-517806633) technology which lead to a large number of [difficult do diagnose issues](https://github.com/krassowski/Anki-Night-Mode/issues?utf8=✓&q=+label%3Aold-version+).
+This plugin adds a functionality of night mode, similar to the one implemented in AnkiDroid app.
 
 ### How it works?
 
@@ -17,6 +13,10 @@ It adds a "view" menu entity with options like:
 It provides shortcut <kbd>ctrl</kbd>+<kbd>n</kbd> to quickly switch mode and color picker to adjust some of color parameters.
 
 After enabling the night mode, the add-on changes colors of menubar, toolbar, bottombars and content windows. Take a look at a screenshot at the bottom of this page to see an example.
+
+### Compatibility
+
+The add-on supports Anki in 2.1 version. While there is an older version of the add-on written for Anki 2.0, it is no longer supported as Anki 2.0 uses [well oudated and unsecure](https://github.com/krassowski/Anki-Night-Mode/issues/79#issuecomment-517806633) technology which lead to a large number of [difficult do diagnose issues](https://github.com/krassowski/Anki-Night-Mode/issues?utf8=✓&q=+label%3Aold-version+).
 
 ### How can I get it?
 
@@ -31,7 +31,7 @@ From menu select: `Tools >> Add-ons >> Browse && Install...` and type the follow
 
 after clicking `ok` the add-on will be downloaded and installed. You neeed to restart Anki to enable changes.
 
-To switch into the night mode you can use <kbd>ctrl</kbd>+<kbd>n</kbd> shortcut, or use the new option in the menu: `View >> Night Mode >> ...`.
+To switch into the night mode you can use <kbd>ctrl</kbd>+<kbd>n</kbd> shortcut, or use one of the new options in the menu: `View >> Night Mode >> ...`.
 
 #### Manual installation
 
@@ -41,12 +41,11 @@ Follow this steps:
 1. Get the newest version of `night_mode` directory from GitHub
 2. Run Anki, from menu select `Tools >> Add-ons >> Open Add-ons Folder...` to open add-ons directory
 4. Copy downloaded directory into the directory opened in the previous step
-5. Restart Anki
-6. Enjoy
+5. Restart Anki and enjoy the latest features!
 
 #### After installation
 
-Don't forget to leave feedback on [Anki webpage](https://ankiweb.net/shared/info/1496166067) or let me know of any issues here, on GitHub.
+Please, leave any feedback on [Anki webpage](https://ankiweb.net/shared/info/1496166067) or let me know of any issues here, on GitHub.
 
 ### Preview
 
@@ -83,3 +82,10 @@ You may use `night_mode` class, to overwrite some of the CSS rules; sometimes us
     color: red;
 }
 ```
+
+
+Add-ons which are known to work well with the night mode:
+- [Anki-TouchScreen](https://github.com/krassowski/Anki-TouchScreen)
+- [Anki-Zoom](https://github.com/krassowski/Anki-Zoom)
+
+If you add-on works well Night Mode, please feel free to add your add-on on to the list above by editing this file (proposing a change)!
