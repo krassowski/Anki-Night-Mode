@@ -80,7 +80,7 @@ You may use `night_mode` class, to overwrite some of the CSS rules; sometimes us
 #### Change color of every piece of text:
 
 ```css
-.night_mode *{
+.night_mode * {
     color: red;
 }
 ```
@@ -109,7 +109,7 @@ given the HTML of your card:
 
 #### Change the color of a cloze
 
-```
+```css
 .night_mode .cloze {
     color: red!important;
 }
