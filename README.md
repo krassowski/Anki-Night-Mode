@@ -75,11 +75,43 @@ If you can help translate the add-on to your language, please join us [at POEdit
 
 #### Custom CSS in night mode
 
-You may use `night_mode` class, to overwrite some of the CSS rules; sometimes usage of `important!` directive or catch-all selector (`*`) will be needed to enforce you own styling. Example:
+You may use `night_mode` class, to overwrite some of the CSS rules; sometimes usage of `important!` directive or catch-all selector (`*`) will be needed to enforce you own styling. Examples:
+
+#### Change color of every piece of text:
 
 ```css
 .night_mode *{
     color: red;
+}
+```
+
+#### Change card background
+
+```css
+.night_mode.card {
+    background: red !important;
+}
+```
+
+#### Specifically replace a background of an element
+
+given the HTML of your card:
+
+```html
+<div>Normal text <span style="background-color: rgb(240, 244, 198);">highlighted text</span></div>
+```
+
+```css
+.night_mode span[style="background-color: rgb(240, 244, 198);"] {
+    background-color: red!important;
+}
+```
+
+#### Change the color of a cloze
+
+```
+.night_mode .cloze {
+    color: red!important;
 }
 ```
 
