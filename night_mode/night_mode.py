@@ -37,7 +37,7 @@ Special thanks to translators:
 """
 import traceback
 
-from anki.hooks import addHook
+from anki.hooks import addHook, runHook
 from aqt import appVersion
 from aqt import mw
 
@@ -53,7 +53,7 @@ from .stylers import Styler
 from .styles import Style, MessageBoxStyle
 
 __addon_name__ = 'Night Mode'
-__version__ = '2.2.3'
+__version__ = '2.2.4'
 __anki_version__ = '2.1'
 
 
@@ -151,6 +151,8 @@ class NightMode:
         self.refresh()
         self.update_menu()
 
+        runHook("night_mode_config_loaded", self.config)
+
     def update_menu(self):
         self.menu.update_checkboxes(self.config.settings)
 
@@ -160,10 +162,12 @@ class NightMode:
     def on(self):
         """Turn on night mode."""
         self.styles.replace()
+        runHook("night_mode_state_changed", True)
 
     def off(self):
         """Turn off night mode."""
         self.styles.restore()
+        runHook("night_mode_state_changed", False)
 
     def refresh(self, reload=False):
         """

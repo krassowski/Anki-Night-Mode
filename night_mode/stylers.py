@@ -754,7 +754,7 @@ class EditorWebViewStyler(Styler):
             {{
                 color: 00BBFF
             }}
-            html, body, #topbuts, .field, .fname
+            html, body, #topbuts, .field, .fname, #topbutsOuter
             {{
                 color: {self.config.color_t}!important;
                 background: {self.config.color_b}!important
