@@ -4,7 +4,7 @@ import aqt
 from anki.stats import CollectionStats
 from aqt import mw, editor, QPixmap
 from aqt.addcards import AddCards
-from aqt.browser import Browser
+from aqt.browser import Browser, SidebarModel
 from aqt.clayout import CardLayout
 from aqt.editcurrent import EditCurrent
 from aqt.editor import Editor
@@ -356,17 +356,6 @@ class BrowserStyler(Styler):
         if browser._previewWindow:
             self.app.take_care_of_night_class(web_object=browser._previewWeb)
 
-    @wraps
-    def buildTree(self, browser):
-        root = browser.sidebarTree
-        for item in root.findItems('', Qt.MatchContains | Qt.MatchRecursive):
-            icon = item.icon(0)
-            pixmap = icon.pixmap(32, 32)
-            image = pixmap.toImage()
-            image.invertPixels()
-            new_icon = aqt.QIcon(QPixmap.fromImage(image))
-            item.setIcon(0, new_icon)
-
     @wraps(position='around')
     def _cardInfoData(self, browser, _old):
 
@@ -485,6 +474,22 @@ class BrowserStyler(Styler):
             image: url('""" + self.app.icons.arrow + """')
         }
         """
+
+
+class SidebarModelStyler(Styler):
+
+    target = SidebarModel
+
+    @wraps(position='around')
+    def iconFromRef(self, sidebar_model, iconRef, _old):
+        icon = _old(sidebar_model, iconRef)
+        if icon:
+            pixmap = icon.pixmap(32, 32)
+            image = pixmap.toImage()
+            image.invertPixels()
+            new_icon = aqt.QIcon(QPixmap.fromImage(image))
+            return new_icon
+        return icon
 
 
 class AddCardsStyler(Styler):
