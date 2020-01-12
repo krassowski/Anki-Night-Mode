@@ -4,7 +4,7 @@ import aqt
 from anki.stats import CollectionStats
 from aqt import mw, editor, QPixmap
 from aqt.addcards import AddCards
-from aqt.browser import Browser, SidebarModel
+from aqt.browser import Browser
 from aqt.clayout import CardLayout
 from aqt.editcurrent import EditCurrent
 from aqt.editor import Editor
@@ -476,20 +476,25 @@ class BrowserStyler(Styler):
         """
 
 
-class SidebarModelStyler(Styler):
+try:
+    from aqt.browser import SidebarModel
 
-    target = SidebarModel
+    class SidebarModelStyler(Styler):
 
-    @wraps(position='around')
-    def iconFromRef(self, sidebar_model, iconRef, _old):
-        icon = _old(sidebar_model, iconRef)
-        if icon:
-            pixmap = icon.pixmap(32, 32)
-            image = pixmap.toImage()
-            image.invertPixels()
-            new_icon = aqt.QIcon(QPixmap.fromImage(image))
-            return new_icon
-        return icon
+        target = SidebarModel
+
+        @wraps(position='around')
+        def iconFromRef(self, sidebar_model, iconRef, _old):
+            icon = _old(sidebar_model, iconRef)
+            if icon:
+                pixmap = icon.pixmap(32, 32)
+                image = pixmap.toImage()
+                image.invertPixels()
+                new_icon = aqt.QIcon(QPixmap.fromImage(image))
+                return new_icon
+            return icon
+except ImportError:
+    pass
 
 
 class AddCardsStyler(Styler):
