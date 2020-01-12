@@ -1,3 +1,12 @@
+### 2.3.0
+*January 12, 2020*
+- Delay loading to allow for compatibility with @lovac42's (and potentially others) add-ons (thanks to @lovac42)
+- Adapt styling of the browser's sidebar to the changes introduced in Anki 2.1.17 (thanks to @zjosua)
+
+### 2.2.4
+*April 20, 2019*
+ - Improve styling to eliminate the white rectangle around buttons in the editor in night mode (introduced by Anki 2.1.8)
+
 ### 2.2.3
 *October 24, 2018*
 - Apply night_mode class to Overview and DeckBrowser for future compatibility with Review Heatmap 0.7
