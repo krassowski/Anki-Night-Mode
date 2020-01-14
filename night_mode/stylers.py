@@ -497,22 +497,31 @@ class BrowserStyler(Styler):
         """
 
 
-try:
+try: # Requires anki 2.1.17++
     from aqt.browser import SidebarModel
 
     class SidebarModelStyler(Styler):
 
         target = SidebarModel
 
+        @wraps
+        def init(self, *args, **kwargs):
+            self.inverted = [] # Prevent auto invert of icon colors.
+
         @wraps(position='around')
         def iconFromRef(self, sidebar_model, iconRef, _old):
             icon = _old(sidebar_model, iconRef)
-            if icon:
-                pixmap = icon.pixmap(32, 32)
-                image = pixmap.toImage()
-                image.invertPixels()
-                new_icon = aqt.QIcon(QPixmap.fromImage(image))
-                return new_icon
+            try:
+                if icon and iconRef not in self.inverted:
+                    pixmap = icon.pixmap(32, 32)
+                    image = pixmap.toImage()
+                    image.invertPixels()
+                    icon = aqt.QIcon(QPixmap.fromImage(image))
+
+                    self.inverted.append(iconRef)
+                    sidebar_model.iconCache[iconRef] = icon
+            except TypeError:
+                pass
             return icon
 except ImportError:
     pass
