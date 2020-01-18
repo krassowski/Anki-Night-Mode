@@ -356,6 +356,27 @@ class BrowserStyler(Styler):
         if browser._previewWindow:
             self.app.take_care_of_night_class(web_object=browser._previewWeb)
 
+
+    @wraps(position='around')
+    def buildTree(self, browser, _old):
+        root = _old(browser)
+        if root: # For Anki 2.1.17++
+            return root
+        # ---------------------------
+        # For Anki 2.1.15--
+        root = browser.sidebarTree
+        for item in root.findItems('', Qt.MatchContains | Qt.MatchRecursive):
+            icon = item.icon(0)
+            pixmap = icon.pixmap(32, 32)
+            image = pixmap.toImage()
+            image.invertPixels()
+            new_icon = aqt.QIcon(QPixmap.fromImage(image))
+            item.setIcon(0, new_icon)
+
+    @wraps
+    def setupSidebar(self, browser):
+        browser.sidebarTree.setStyleSheet(self.style)
+
     @wraps(position='around')
     def _cardInfoData(self, browser, _old):
 
@@ -476,22 +497,31 @@ class BrowserStyler(Styler):
         """
 
 
-try:
+try: # Requires anki 2.1.17++
     from aqt.browser import SidebarModel
 
     class SidebarModelStyler(Styler):
 
         target = SidebarModel
 
+        @wraps
+        def init(self, *args, **kwargs):
+            self.inverted = [] # Prevent auto invert of icon colors.
+
         @wraps(position='around')
         def iconFromRef(self, sidebar_model, iconRef, _old):
             icon = _old(sidebar_model, iconRef)
-            if icon:
-                pixmap = icon.pixmap(32, 32)
-                image = pixmap.toImage()
-                image.invertPixels()
-                new_icon = aqt.QIcon(QPixmap.fromImage(image))
-                return new_icon
+            try:
+                if icon and iconRef not in self.inverted:
+                    pixmap = icon.pixmap(32, 32)
+                    image = pixmap.toImage()
+                    image.invertPixels()
+                    icon = aqt.QIcon(QPixmap.fromImage(image))
+
+                    self.inverted.append(iconRef)
+                    sidebar_model.iconCache[iconRef] = icon
+            except TypeError:
+                pass
             return icon
 except ImportError:
     pass
