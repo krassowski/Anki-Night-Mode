@@ -1,3 +1,7 @@
+### 2.3.1
+*January 18, 2020*
+- Fix/improve the browser's sidebar compatibility issues related to the 2.1.17 release (thanks to @lovac42)
+
 ### 2.3.0
 *January 12, 2020*
 - Delay loading to allow for compatibility with @lovac42's (and potentially others) add-ons (thanks to @lovac42)
