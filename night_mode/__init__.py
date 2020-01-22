@@ -6,12 +6,17 @@ from anki.hooks import addHook
 NM_RESERVED_DELAY = 666
 
 
+night_mode = None
 def delayedLoader():
+    global night_mode
     from .night_mode import NightMode
     night_mode = NightMode()
     night_mode.load()
 
 def onProfileLoaded():
-    mw.progress.timer(NM_RESERVED_DELAY, delayedLoader, False)
+    if not night_mode:
+        mw.progress.timer(
+            NM_RESERVED_DELAY, delayedLoader, False
+        )
 
 addHook('profileLoaded', onProfileLoaded)
