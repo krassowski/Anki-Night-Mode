@@ -1,4 +1,5 @@
 from PyQt5.QtCore import Qt
+from PyQt5 import QtWidgets
 
 import aqt
 from anki.stats import CollectionStats
@@ -347,6 +348,8 @@ class BrowserStyler(Styler):
             browser.form.tableView.horizontalHeader().setStyleSheet(self.table_header)
 
             browser.form.searchEdit.setStyleSheet(self.search_box)
+            browser.form.searchEdit.setSizeAdjustPolicy(QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLength)
+
             browser.form.searchButton.setStyleSheet(self.buttons.qt)
             browser.form.previewButton.setStyleSheet(self.buttons.qt)
 
