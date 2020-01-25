@@ -137,8 +137,10 @@ class NightMode:
 
         addHook('unloadProfile', self.save)
 
-        # Disabled, uses delay in __init__.py
-        # addHook('profileLoaded', self.load)
+        # Note: This will not affect the starting profile
+        # due to the delay added in __init__.py.
+        # Only subsequent profiles will be affected.
+        addHook('profileLoaded', self.load)
 
         addHook('prepareQA', self.night_class_injection)
 

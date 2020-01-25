@@ -1,5 +1,5 @@
 from aqt import mw
-from anki.hooks import addHook
+from anki.hooks import addHook, remHook
 
 
 #addons should selectively load before or after a delay of 666
@@ -12,6 +12,9 @@ def delayedLoader():
     night_mode.load()
 
 def onProfileLoaded():
-    mw.progress.timer(NM_RESERVED_DELAY, delayedLoader, False)
+    remHook("profileLoaded", onProfileLoaded)
+    mw.progress.timer(
+        NM_RESERVED_DELAY, delayedLoader, False
+    )
 
 addHook('profileLoaded', onProfileLoaded)
