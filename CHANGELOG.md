@@ -1,3 +1,8 @@
+### 2.3.2
+*January 25, 2020*
+- Fix the "sidebar not resizing" bug  (thanks to @lovac42)
+- Fix the profile switching bug (thanks to @lovac42)
+
 ### 2.3.1
 *January 18, 2020*
 - Fix/improve the browser's sidebar compatibility issues related to the 2.1.17 release (thanks to @lovac42)
