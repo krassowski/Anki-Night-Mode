@@ -1,6 +1,10 @@
+### 2.3.3
+*January 29, 2020*
+- Fix compatibility with other add-ons (thanks to @lovac42)
+
 ### 2.3.2
 *January 25, 2020*
-- Fix the "sidebar not resizing" bug  (thanks to @lovac42)
+- Fix the "sidebar not resizing" bug (thanks to @lovac42)
 - Fix the profile switching bug (thanks to @lovac42)
 
 ### 2.3.1
