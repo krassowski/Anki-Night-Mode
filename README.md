@@ -3,6 +3,14 @@
 
 This plugin adds a functionality of night mode, similar to the one implemented in AnkiDroid app.
 
+## Archiving note
+
+Recent versions of Anki (2.1.20+) introduced built-in Night Mode support. While it does not have all the features that this add-on offered, it causes fewer conflicts and does not require a never-ending maintenance burden due to the limited add-ons API and breaking changes in the interfaces. You are advised to upgrade Anki and use the built-in night mode instead of this add-on; please report any missing features to the Anki authors.
+
+To prevent user confusion this repository has been archived but you are welcome to install the old versions as legacy support, or to contact the author (who still uses Anki) if you wish to port this add-on to a newer version ([see this issue](https://github.com/krassowski/Anki-Night-Mode/issues/101#issuecomment-626913211)).
+
+It was fun 5 years; many thanks to all contributors listed [here](https://github.com/krassowski/Anki-Night-Mode/blob/master/night_mode/night_mode.py#L25-L38) and [there](https://github.com/krassowski/Anki-Night-Mode/graphs/contributors) and to all of you: friendly users who encouraged developement and maintenance.
+
 ### How it works?
 
 It adds a "view" menu entity with options like:
